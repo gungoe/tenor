@@ -1,0 +1,1783 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F1E8">
+<title>Tenor</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./iconen/tenor-papier-180.png">
+<link rel="icon" type="image/png" href="./iconen/tenor-papier-192.png">
+<style>
+/* ==== letters ==== */
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(./letters/ibm-plex-mono-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(./letters/ibm-plex-mono-normal-500.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(./letters/ibm-plex-sans-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url(./letters/ibm-plex-sans-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url(./letters/ibm-plex-sans-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Newsreader'; font-style: italic; font-weight: 400; font-display: swap; src: url(./letters/newsreader-italic-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Newsreader'; font-style: normal; font-weight: 400; font-display: swap; src: url(./letters/newsreader-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Newsreader'; font-style: normal; font-weight: 500; font-display: swap; src: url(./letters/newsreader-normal-400.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* ==== einde letters ==== */
+
+/* ==== thema: kleuren, letters, maat ==== */
+:root {
+  --grond: #F5F1E8; --grond-2: #ECE6D8; --inkt: #14181C; --sub: #3A4048; --mute: #6B6960; --lijn: #DCD5C6;
+  --goud: #A8791C; --goud-inkt: #7D5A12; --goud-zacht: #EFE3C6; --grafiet: #8E97A1; --baksteen: #8A3B2B;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', Menlo, 'SF Mono', monospace;
+  --marge: 22px;
+  --curve: cubic-bezier(.4, 0, .2, 1);
+  color-scheme: light;
+}
+html[data-rust] { --grond: #EFE9DA; }
+html[data-thema="avond"] {
+  --grond: #131215; --grond-2: #1B191E; --inkt: #F2EEE6; --sub: #BDB7AC; --mute: #8F8A80; --lijn: #2A272D;
+  --goud: #D6B25E; --goud-inkt: #D6B25E; --goud-zacht: #2A2418; --grafiet: #6F6B64; --baksteen: #D98572;
+  color-scheme: dark;
+}
+html[data-thema="avond"][data-rust] { --grond: #0F0E11; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--grond); }
+body {
+  color: var(--inkt); font: 400 15px/1.4 var(--sans);
+  font-variant-numeric: tabular-nums; -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; background: none; border: 0; text-align: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--goud); outline-offset: 2px; }
+svg { display: block; }
+
+.app {
+  position: relative; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--grond); transition: background-color 2.4s var(--curve);
+}
+.app > * { position: relative; z-index: 1; }
+.app > .spot { position: absolute; z-index: 0; }
+
+/* ---- kop ---- */
+.kop {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 44px; padding: calc(8px + env(safe-area-inset-top)) var(--marge) 0;
+}
+.merk { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.merk svg { width: 46px; height: 28px; overflow: visible; }
+.merk-woord { font: 500 12px/1 var(--mono); letter-spacing: .22em; color: var(--inkt); }
+.merk-boven, .merk-noot { fill: var(--goud); }
+.merk-onder { fill: var(--grafiet); }
+.terug { display: flex; align-items: center; gap: 6px; min-height: 44px; margin-left: -6px; padding-right: 8px; color: var(--inkt); }
+.terug svg { width: 22px; height: 22px; }
+.cadence { font: 400 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); white-space: nowrap; }
+.cadence.alarm { color: var(--baksteen); }
+.kop-rechts { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.tandwiel { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -11px; color: var(--mute); }
+.tandwiel svg { width: 22px; height: 22px; }
+.terug-label { color: var(--inkt); }
+.merk { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.merk.groot svg { width: 92px; height: 56px; }
+
+/* ---- scherm ---- */
+.scherm { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: 28px; }
+.titel-rij {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px;
+  padding: 10px var(--marge) 0;
+}
+.titel { font: 500 34px/1.15 var(--serif); letter-spacing: -.01em; }
+.onderregel { margin-left: auto; font: 400 12px/1.4 var(--mono); color: var(--mute); white-space: nowrap; }
+.vast { position: sticky; top: 0; z-index: 2; background: var(--grond); transition: background-color 2.4s var(--curve); }
+/* de spot ligt onder de inhoud; de vaste kop draagt dezelfde lichtvlek, zodat er geen rand ontstaat */
+html[data-thema="avond"] .vast {
+  background-image: radial-gradient(300px circle at -60px calc(-60px - var(--kophoogte, 52px)), rgba(214, 178, 94, .16), rgba(214, 178, 94, 0));
+}
+
+.zin-blok { display: flex; gap: 12px; align-items: flex-start; padding: 10px var(--marge) 0; }
+.zin { font: italic 400 18px/1.35 var(--serif); color: var(--sub); max-width: 34ch; }
+.zin-blok .rustteken { width: 30px; height: 30px; flex: none; margin-top: 1px; }
+.zin-extra { padding: 6px var(--marge) 0; font-size: 12.5px; color: var(--sub); }
+.alarm, .zin.alarm, .zin-extra.alarm { color: var(--baksteen); }
+.melding { padding-top: 12px; font-size: 13px; }
+.kopie-regel { margin: 0 var(--marge); padding-top: 2px; font: 400 12.5px/1.35 var(--sans); color: var(--mute); }
+
+.label { font: 400 10.5px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.label.goud, .goud-tekst { color: var(--goud-inkt); }
+.mono { font-family: var(--mono); }
+.heel { white-space: nowrap; }
+.lijn { height: 1px; background: var(--lijn); margin: 0 var(--marge); }
+
+/* ---- Stand ---- */
+.held-blok { padding: 22px var(--marge) 0; }
+.held-blok .label { margin-bottom: 8px; }
+.held { font: 500 72px/1 var(--serif); letter-spacing: -.025em; display: flex; align-items: baseline; }
+.held .eenheid { font: 500 14px/1 var(--mono); letter-spacing: 0; color: var(--goud-inkt); margin-left: 8px; }
+
+.balken { padding: 18px var(--marge) 16px; }
+.balkrij { position: relative; display: flex; align-items: center; min-height: 24px; }
+.balkrij .spoor { position: absolute; left: 0; top: 50%; right: 0; height: 0; }
+.balk { position: absolute; left: 0; top: 50%; transform-origin: left center; }
+.balk.tenor { height: 5px; margin-top: -2.5px; border-radius: 2.5px; background: var(--goud); }
+.balk.baseline { height: 4px; margin-top: -2px; border-radius: 2px; background: var(--grafiet); }
+.balkwaarde { margin-left: auto; font: 400 13px/1 var(--mono); white-space: nowrap; }
+.balkwaarde.gedimd { color: var(--mute); }
+.legende { display: flex; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+
+.grafiek-blok { padding: 16px var(--marge) 6px; }
+.aflezing { font: 400 12px/1.4 var(--mono); min-height: 17px; margin-bottom: 4px; white-space: nowrap; visibility: hidden; }
+.aflezing.zichtbaar { visibility: visible; }
+.grafiek { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.grafiek svg { width: 100%; height: auto; overflow: visible; }
+.raster { stroke: var(--lijn); stroke-width: 1; }
+.as-tekst { font: 400 11px var(--mono); fill: var(--mute); }
+.reeks { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.reeks.tenor { stroke: var(--goud); stroke-width: 2.5; }
+.reeks.baseline { stroke: var(--grafiet); stroke-width: 2.5; }
+.reeks.sma { stroke: var(--grafiet); stroke-width: 2; }
+.noot { fill: var(--goud); }
+.peil { stroke: var(--mute); stroke-width: 1; }
+.as-onder { display: flex; justify-content: space-between; margin-top: 6px; font: 400 11px/1 var(--mono); color: var(--mute); }
+
+/* ---- rijen ---- */
+.rijen { margin: 0 var(--marge); }
+.rij {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 11px 0;
+  border-top: 1px solid var(--lijn);
+}
+.rijen > .rij:first-child.zonder-lijn { border-top: 0; }
+.rij-hoofd { flex: 1; min-width: 0; }
+.rij-titel { font: 400 15px/1.3 var(--sans); }
+.rij-sub { font: 400 12.5px/1.35 var(--sans); color: var(--mute); margin-top: 2px; }
+.rij-rechts { flex: none; text-align: right; font: 400 13px/1.3 var(--mono); white-space: nowrap; }
+.rij-rechts.tekst { font-family: var(--sans); }
+.rij-rechts .klein { display: block; font-size: 11px; color: var(--mute); margin-top: 3px; }
+.met-teken { display: inline-flex; align-items: center; gap: 6px; }
+.met-teken .rustteken { width: 16px; height: 16px; }
+.rij.met-onder { flex-wrap: wrap; row-gap: 0; }
+.voortgang { flex: 0 0 100%; height: 2px; background: var(--lijn); margin-top: 9px; position: relative; }
+.voortgang span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--goud); transform-origin: left center; }
+.stip { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--goud); margin-right: 7px; vertical-align: 1px; }
+
+.tag {
+  display: inline-block; flex: none; font: 500 9.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  border: 1px solid currentColor; border-radius: 3px; padding: 2px 7px; white-space: nowrap;
+}
+.tag-verkoop { color: var(--baksteen); border-color: var(--baksteen); }
+.tag-koop, .tag-afroming { color: var(--goud-inkt); border-color: var(--goud); }
+.tag-afroombaar { color: var(--goud-inkt); border-color: var(--goud); background: var(--goud-zacht); }
+.tag-tracker, .tag-restje, .tag-dividend { color: var(--mute); border-color: var(--mute); }
+
+/* ---- Laden ---- */
+.app[data-modus="laden"] .kop, .tabbalk[hidden] { display: none; }
+.app[data-modus="laden"] .scherm { display: flex; align-items: center; justify-content: center; padding: 0 var(--marge); }
+.laden { display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+.laden-wacht { margin-top: -8px; font: 400 12.5px/1.35 var(--sans); color: var(--mute); }
+
+/* ---- Instellingen ---- */
+.veld { display: block; padding: 18px var(--marge) 0; }
+.veld > .label { display: block; margin-bottom: 2px; }
+.invoer {
+  display: block; width: 100%; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--lijn); border-radius: 0;
+  background: transparent; color: var(--inkt); font: 400 16px/1.3 var(--sans); -webkit-appearance: none; appearance: none;
+}
+.invoer:focus { outline: none; border-bottom-color: var(--inkt); }
+.veld + .rijen, .veld-onder + .veld + .rijen { margin-top: 14px; }
+.veld-regel { padding: 6px var(--marge) 0; font: 400 12.5px/1.35 var(--sans); color: var(--mute); }
+.rijen.ruimte { margin-top: 24px; }
+.keuzes { display: flex; border-bottom: 1px solid var(--lijn); }
+.keuze { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; color: var(--mute); }
+.keuze .label { color: inherit; }
+.keuze .tabnoot { width: 4px; height: 4px; border-radius: 50%; background: var(--goud); visibility: hidden; }
+.keuze[aria-pressed="true"] { color: var(--inkt); }
+.keuze[aria-pressed="true"] .tabnoot { visibility: visible; }
+.rij.cash { justify-content: space-between; }
+
+/* ---- Portefeuille ---- */
+.legende-rij { display: flex; justify-content: space-between; gap: 10px; padding: 12px var(--marge) 8px; border-bottom: 1px solid var(--lijn); margin: 0; }
+.blokje { display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: 0; }
+.blokje.goud { background: var(--goud); }
+.blokje.grafiet { background: var(--grafiet); }
+.positie { display: block; padding: 11px 0 12px; }
+.positie:first-child { border-top: 0; }
+.positie-lijn { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ticker { font: 400 14px/1.3 var(--mono); flex: none; }
+.naam { font: 400 13px/1.3 var(--sans); color: var(--mute); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rendement, .gewicht { font: 400 13px/1.3 var(--mono); white-space: nowrap; flex: none; }
+.gewicht { min-width: 44px; text-align: right; }
+.gewichtspoor { height: 4px; background: var(--grond-2); margin-top: 8px; border-radius: 2px; overflow: hidden; }
+.gewichtspoor span { display: block; height: 100%; background: var(--grafiet); border-radius: 2px; }
+.gewichtspoor span.boven { background: var(--goud); }
+
+/* ---- Vandaag ---- */
+.sectie { padding: 20px var(--marge) 0; }
+.sectie-kop { display: flex; justify-content: space-between; padding-bottom: 8px; }
+.sectie .rij:first-of-type { border-top: 1px solid var(--lijn); }
+.transactie { align-items: flex-start; }
+.transactie .positie-lijn .tag { margin-right: 2px; }
+.reden { font: 400 13px/1.35 var(--sans); color: var(--sub); margin-top: 4px; }
+.leeg { font: 400 13px/1.4 var(--sans); color: var(--sub); padding: 12px 0 2px; border-top: 1px solid var(--lijn); }
+
+/* ---- Grootboek ---- */
+.strook { display: grid; grid-template-columns: repeat(3, 1fr); margin: 14px var(--marge) 0; border-top: 1px solid var(--lijn); border-bottom: 1px solid var(--lijn); }
+.strook > div { padding: 10px 0 10px 12px; border-left: 1px solid var(--lijn); }
+.strook > div:first-child { border-left: 0; padding-left: 0; }
+.strook-waarde { font: 500 22px/1.2 var(--serif); margin-top: 4px; white-space: nowrap; }
+.dag { padding: 20px var(--marge) 0; }
+.dag .label { padding-bottom: 8px; }
+
+/* ---- Detail ---- */
+.detail-kop { padding: 8px var(--marge) 0; }
+.detail-meta { font: 400 12px/1.4 var(--mono); color: var(--mute); }
+.detail-naam { display: flex; align-items: center; gap: 12px; }
+.detail-naam .titel { flex: 1; min-width: 0; }
+.kolommen { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px var(--marge) 0; }
+.kolom-waarde { font: 500 30px/1.15 var(--serif); letter-spacing: -.01em; margin-top: 6px; white-space: nowrap; }
+.kolom-waarde.goud { color: var(--goud); }
+.kolom-sub { font: 400 12.5px/1.35 var(--sans); color: var(--mute); margin-top: 4px; }
+.balkgrid { display: grid; grid-template-columns: 1fr auto; column-gap: 14px; align-items: center; padding: 18px var(--marge) 4px; row-gap: 6px; }
+.balkgrid .spoor { position: relative; height: 22px; }
+.balkgrid .balkwaarde { margin: 0; text-align: right; }
+.sma-label { font: 400 10.5px var(--mono); letter-spacing: .14em; fill: var(--mute); }
+
+/* ---- tabbalk ---- */
+.tabbalk { display: flex; border-top: 1px solid var(--lijn); padding-bottom: env(safe-area-inset-bottom); background: var(--grond); transition: background-color 2.4s var(--curve); }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 58px; padding: 8px 0 6px; color: var(--mute); }
+.tab svg { width: 22px; height: 22px; }
+.tab .label { color: inherit; }
+.tab .tabnoot { width: 4px; height: 4px; border-radius: 50%; background: var(--goud); visibility: hidden; }
+.tab[aria-current="page"] { color: var(--inkt); }
+.tab[aria-current="page"] .tabnoot { visibility: visible; }
+.icoon { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rustteken path { fill: none; stroke: var(--goud); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.voorbeeld-label { text-align: center; padding: calc(4px + env(safe-area-inset-top)) 0 0; }
+.voorbeeld-label + .kop { padding-top: 2px; }
+
+/* ==== beweging: vier gebaren ==== */
+@keyframes strijk { from { transform: scaleX(0); } }
+@keyframes trek { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes noot-in { from { opacity: 0; transform: scale(.2); } }
+@keyframes inzet { from { opacity: 0; transform: translateY(8px); } }
+@keyframes spot-in { from { opacity: 0; } }
+@keyframes gloei { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
+@keyframes adem { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+@keyframes schuif-in { from { opacity: 0; transform: translateX(24px); } }
+@keyframes schuif-terug { from { opacity: 0; transform: translateX(-24px); } }
+
+/* 1. Strijk */
+.s-balk { transform-box: fill-box; transform-origin: left center; }
+.strijken .s-balk { animation: strijk 1.2s var(--curve) both; }
+.strijken .s-lijn { stroke-dasharray: 1; animation: trek 1.2s var(--curve) both; }
+.strijken .s-later { animation-delay: .3s; }
+.s-noot { transform-box: fill-box; transform-origin: center; }
+.strijken .s-noot { animation: noot-in .35s var(--curve) .78s both; }
+/* binnen een blok dat inzet: de strijk begint pas als het blok verschijnt */
+.strijken .inzet .s-balk, .strijken .inzet .s-lijn { animation-delay: calc(var(--stap, 0) * 120ms); }
+.strijken .inzet .s-later { animation-delay: calc(var(--stap, 0) * 120ms + .3s); }
+.strijken .inzet .s-noot { animation-delay: calc(var(--stap, 0) * 120ms + .78s); }
+
+/* 2. Inzet */
+.inzet { animation: inzet .6s var(--curve) both; animation-delay: calc(var(--stap, 0) * 120ms); }
+.stil .inzet { animation: none; }
+
+/* 3. Spot, alleen 's avonds */
+.spot { display: none; left: -360px; top: -360px; width: 600px; height: 600px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(214, 178, 94, .16), rgba(214, 178, 94, 0)); }
+html[data-thema="avond"] .spot { display: block; animation: spot-in 1.4s var(--curve) both; }
+html[data-thema="avond"] .gloeit { animation: gloei 3s ease-in-out infinite; }
+html[data-thema="avond"] .strijken .s-balk.gloeit { animation: strijk 1.2s var(--curve) both, gloei 3s ease-in-out infinite; animation-delay: 0s, 1.2s; }
+html[data-thema="avond"] .strijken .inzet .s-balk.gloeit { animation-delay: calc(var(--stap, 0) * 120ms), calc(var(--stap, 0) * 120ms + 1.2s); }
+html[data-thema="avond"] .strijken .s-noot .gloeit { animation: gloei 3s ease-in-out 1.13s infinite; }
+
+/* 4. Rust */
+html[data-rust] .rustteken { animation: adem 2.4s ease-in-out infinite; }
+
+/* strijk opnieuw na een trek om te vernieuwen */
+.opnieuw .s-balk { animation: strijk 1.2s var(--curve) both; }
+.opnieuw .s-later { animation-delay: .3s; }
+.opnieuw .s-noot { animation: noot-in .35s var(--curve) .78s both; }
+
+.naar-detail { animation: schuif-in .25s ease-out both; }
+.van-detail { animation: schuif-terug .25s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="spot" aria-hidden="true"></div>
+  <header class="kop" id="kop"></header>
+  <main class="scherm" id="scherm"></main>
+  <nav class="tabbalk" id="tabbalk" aria-label="Hoofdschermen"></nav>
+</div>
+<script>
+/* ==== instellingen ==== */
+const Instellingen = (() => {
+  'use strict';
+  const SLEUTEL = 'tenor.instellingen';
+  const STANDAARD = { repo: '', token: '', thema: 'automatisch' };
+
+  // localStorage kan ontbreken of leeg terugkomen; de app werkt dan met de standaard
+  function lees() {
+    try {
+      const ruw = JSON.parse(localStorage.getItem(SLEUTEL) || '{}');
+      return {
+        repo: typeof ruw.repo === 'string' ? ruw.repo : STANDAARD.repo,
+        token: typeof ruw.token === 'string' ? ruw.token : STANDAARD.token,
+        thema: ['automatisch', 'dag', 'avond'].includes(ruw.thema) ? ruw.thema : STANDAARD.thema
+      };
+    } catch (e) { return { ...STANDAARD }; }
+  }
+
+  function bewaar(deel) {
+    const nieuw = { ...lees(), ...deel };
+    try { localStorage.setItem(SLEUTEL, JSON.stringify(nieuw)); } catch (e) { /* opslag niet beschikbaar */ }
+    return nieuw;
+  }
+
+  const volledig = ins => !!(ins.token && ins.repo);
+
+  return { lees, bewaar, volledig };
+})();
+/* ==== einde instellingen ==== */
+
+
+/* ==== ophalen ==== */
+const Ophalen = (() => {
+  'use strict';
+  const KOPIE = 'tenor.kopie';
+  const TIJDSLIMIET = 15000;
+
+  // één fetch naar monitor.json, hoogstens 15 s;
+  // geeft { soort: 'ok' | 'token' | 'niet-gevonden' | 'fout' | 'offline' | 'time-out' | 'onvolledig', tekst?, status? }
+  async function haal({ repo, token }) {
+    if (!token) return { soort: 'onvolledig' };
+    const url = Model.monitorUrl(repo);
+    if (!url) return { soort: 'niet-gevonden' };
+    const stop = new AbortController();
+    const klok = setTimeout(() => stop.abort(), TIJDSLIMIET);
+    try {
+      const antwoord = await fetch(url, {
+        headers: { Accept: 'application/vnd.github.raw+json', Authorization: `Bearer ${token}` },
+        cache: 'no-store', signal: stop.signal
+      });
+      const soort = Model.ophaalSoort(antwoord.status);
+      if (soort !== 'ok') return { soort, status: antwoord.status };
+      return { soort: 'ok', tekst: await antwoord.text() };
+    } catch (e) {
+      return { soort: stop.signal.aborted ? 'time-out' : 'offline' };
+    } finally {
+      clearTimeout(klok);
+    }
+  }
+
+  function leesKopie() {
+    try {
+      const ruw = JSON.parse(localStorage.getItem(KOPIE) || 'null');
+      return ruw && typeof ruw.tekst === 'string' ? ruw : null;
+    } catch (e) { return null; }
+  }
+
+  function bewaarKopie(tekst, opgehaald) {
+    try { localStorage.setItem(KOPIE, JSON.stringify({ tekst, opgehaald })); return true; }
+    catch (e) { return false; }
+  }
+
+  function wisKopie() {
+    try { localStorage.removeItem(KOPIE); } catch (e) { /* niets te wissen */ }
+  }
+
+  return { haal, leesKopie, bewaarKopie, wisKopie };
+})();
+/* ==== einde ophalen ==== */
+
+
+/* ==== model ==== */
+const Model = (() => {
+  'use strict';
+
+  const MIN = '\u2212';          // typografisch min-teken
+  const HARDE_SPATIE = '\u00a0'; // "€ 101.240" breekt nooit af
+
+  /* ---- formattering ---- */
+
+  function getal(n, decimalen = 0) {
+    if (typeof n !== 'number' || !isFinite(n)) return '';
+    const factor = 10 ** decimalen;
+    const afgerond = Math.round(Math.abs(n) * factor + 1e-9) / factor;
+    const [geheel, deel] = afgerond.toFixed(decimalen).split('.');
+    const tekst = geheel.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (deel ? ',' + deel : '');
+    return (n < 0 && afgerond !== 0 ? MIN : '') + tekst;
+  }
+
+  function euro(n, decimalen = 0) {
+    if (typeof n !== 'number' || !isFinite(n)) return '';
+    const zonder = getal(Math.abs(n), decimalen);
+    const negatief = n < 0 && zonder.replace(/[^1-9]/g, '') !== '';
+    return (negatief ? MIN : '') + '€' + HARDE_SPATIE + zonder;
+  }
+
+  // f is een fractie (0,012 = 1,2%)
+  function pct(f, decimalen = 1, teken = false) {
+    if (typeof f !== 'number' || !isFinite(f)) return '';
+    const tekst = getal(f * 100, decimalen);
+    const positief = f > 0 && tekst.replace(/[^1-9]/g, '') !== '';
+    return (teken && positief ? '+' : '') + tekst + '%';
+  }
+
+  // procentpunten uit een fractie; de eenheid "pt" zet het scherm er zelf naast
+  function pt(f, decimalen = 1) {
+    if (typeof f !== 'number' || !isFinite(f)) return '';
+    return getal(f * 100, decimalen);
+  }
+
+  const DAG_KORT = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+  const MAAND_KORT = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+
+  function leesDatum(s) {
+    if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+    const [j, m, d] = s.split('-').map(Number);
+    const dt = new Date(j, m - 1, d);
+    return dt.getMonth() === m - 1 && dt.getDate() === d ? dt : null;
+  }
+
+  const twee = n => String(n).padStart(2, '0');
+
+  // vormen: kort "do 10 sep 2026" · lang "DO 10 SEP" · dmj "9 sep 2027"
+  //         dm en as "9 sep" · wdm "do 14 aug" · cijfers "31-01-2024" · dagmaand "31-08"
+  function datum(s, vorm = 'kort') {
+    const dt = s instanceof Date ? s : leesDatum(s);
+    if (!dt) return '';
+    const d = dt.getDate(), m = dt.getMonth(), j = dt.getFullYear(), w = dt.getDay();
+    switch (vorm) {
+      case 'lang': return `${DAG_KORT[w]} ${d} ${MAAND_KORT[m]}`.toUpperCase();
+      case 'dmj': return `${d} ${MAAND_KORT[m]} ${j}`;
+      case 'dm': case 'as': return `${d} ${MAAND_KORT[m]}`;
+      case 'wdm': return `${DAG_KORT[w]} ${d} ${MAAND_KORT[m]}`;
+      case 'cijfers': return `${twee(d)}-${twee(m + 1)}-${j}`;
+      case 'dagmaand': return `${twee(d)}-${twee(m + 1)}`;
+      default: return `${DAG_KORT[w]} ${d} ${MAAND_KORT[m]} ${j}`;
+    }
+  }
+
+  function leesTijd(iso) {
+    if (typeof iso !== 'string') return null;
+    const dt = new Date(iso);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  function tijd(iso) {
+    const dt = iso instanceof Date ? iso : leesTijd(iso);
+    return dt ? `${twee(dt.getHours())}:${twee(dt.getMinutes())}` : '';
+  }
+
+  const WOORDEN = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien', 'elf', 'twaalf'];
+  const inWoorden = n => (Number.isInteger(n) && n >= 0 && n < WOORDEN.length ? WOORDEN[n] : String(n));
+
+  const hoofdletter = t => (t.startsWith('één') ? 'Eén' + t.slice(3) : t.charAt(0).toUpperCase() + t.slice(1));
+
+  const stuks = n => (typeof n === 'number' && isFinite(n) ? `${getal(n)}${HARDE_SPATIE}st` : '');
+  const dagenTekst = n => (n === 1 ? '1 dag' : `${getal(n)} dagen`);
+
+  // lege sectie op Vandaag: één zin in Sub (5.3)
+  function legeZin(soort, { rust = false, open_plaatsen, cash } = {}) {
+    if (soort === 'verkopen') return 'Geen verkopen.';
+    if (soort === 'afromingen') return 'Geen afromingen.';
+    const begin = rust ? 'Geen aankopen tijdens Rest.' : 'Geen aankopen.';
+    if (typeof open_plaatsen !== 'number' || !isFinite(open_plaatsen)) return begin;
+    if (open_plaatsen === 0) return rust ? `${begin} Alle plaatsen zijn bezet.` : 'Geen aankopen; alle plaatsen zijn bezet.';
+    const plaatsen = `${hoofdletter(inWoorden(open_plaatsen))} ${open_plaatsen === 1 ? 'plaats' : 'plaatsen'} open`;
+    const geld = typeof cash === 'number' && isFinite(cash) ? `, ${euro(cash)} in cash` : '';
+    return `${begin} ${plaatsen}${geld}.`;
+  }
+
+  /* ---- kalender ---- */
+
+  const middernacht = dt => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const isWerkdag = dt => dt.getDay() !== 0 && dt.getDay() !== 6;
+
+  // werkdagen na 'van' tot en met 'tot' (feestdagen niet meegeteld)
+  function handelsdagenTussen(van, tot) {
+    let d = middernacht(van), eind = middernacht(tot), n = 0;
+    while (d < eind) {
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      if (isWerkdag(d)) n++;
+    }
+    return n;
+  }
+
+  function kalenderdagenTussen(van, tot) {
+    return Math.round((middernacht(tot) - middernacht(van)) / 86400000);
+  }
+
+  function relatieveDag(dt, nu) {
+    const verschil = kalenderdagenTussen(dt, nu);
+    if (verschil === 0) return 'vandaag';
+    if (verschil === 1) return 'gisteren';
+    return datum(dt, 'dm');
+  }
+
+  // volgende avondrun: vanavond als er vandaag (werkdag) nog geen run was
+  function volgendeRun(laatsteRun, nu) {
+    if (isWerkdag(nu) && (!laatsteRun || kalenderdagenTussen(laatsteRun, nu) > 0)) return 'vanavond';
+    const morgen = new Date(nu.getFullYear(), nu.getMonth(), nu.getDate() + 1);
+    return isWerkdag(morgen) ? 'morgenavond' : 'maandag';
+  }
+
+  // "offline · kopie van 18:21" bij een netwerkfout of time-out, "niet bijgewerkt · kopie van 18:21" bij elke andere fout;
+  // de dag komt erbij als de kopie niet van vandaag is
+  function kopieRegel(soort, opgehaald, nu) {
+    const begin = soort === 'offline' ? 'offline' : 'niet bijgewerkt';
+    const dt = opgehaald instanceof Date ? opgehaald : leesTijd(opgehaald);
+    if (!dt) return begin;
+    const wanneer = kalenderdagenTussen(dt, nu) === 0 ? tijd(dt) : `${datum(dt, 'wdm')} ${tijd(dt)}`;
+    return `${begin} · kopie van ${wanneer}`;
+  }
+
+  /* ---- ophalen ---- */
+
+  function ophaalSoort(status) {
+    if (status >= 200 && status < 300) return 'ok';
+    if (status === 401 || status === 403) return 'token';
+    if (status === 404) return 'niet-gevonden';
+    return 'fout';
+  }
+
+  // uitkomst: 'ok' | 'kapot' (geen geldige JSON) | 'token' (401/403) | 'niet-gevonden' (404)
+  //          | 'fout' (5xx en andere) | 'offline' | 'time-out'
+  // modus:   'laden' | 'app' | 'instellingen'; kopie: er stond al een geldige monitor.json in de app
+  // zelf:    het ophalen kwam van de gebruiker in Instellingen (veld verlaten), niet van openen of terugkeer
+  // geeft:   { modus, melding: null | 'token' | 'niet-gevonden', regel: null | 'offline' | 'niet-bijgewerkt' }
+  //          regel = wat er onder de Cadence-rij staat zolang de kopie getoond wordt
+  function volgendScherm(uitkomst, { modus, kopie, zelf = false }) {
+    // gelukt: naar de app. Wie in Instellingen zit blijft daar, tenzij er nog geen kopie was en het ophalen
+    // bij terugkeer naar de voorgrond gebeurde: dan opent de app vanzelf zodra het bestand er is
+    if (uitkomst === 'ok') return { modus: modus === 'instellingen' && (kopie || zelf) ? 'instellingen' : 'app', melding: null, regel: null };
+    const regel = !kopie ? null : (uitkomst === 'offline' || uitkomst === 'time-out' ? 'offline' : 'niet-bijgewerkt');
+    if (uitkomst === 'token') return { modus: 'instellingen', melding: 'token', regel };
+    // 404: zonder kopie naar Instellingen; met kopie zoals een 5xx, behalve wie al in Instellingen zit
+    if (uitkomst === 'niet-gevonden' && (!kopie || modus === 'instellingen')) return { modus: 'instellingen', melding: 'niet-gevonden', regel };
+    if (modus === 'instellingen') return { modus: 'instellingen', melding: null, regel };
+    return { modus: kopie ? 'app' : 'laden', melding: null, regel };
+  }
+
+  // alleen een token dat GitHub weigerde wordt pas opnieuw geprobeerd als het verandert
+  function magOphalen(ins, geweigerd) {
+    if (!ins || !ins.token || !monitorUrl(ins.repo)) return false;
+    if (geweigerd && geweigerd.soort === 'token') return ins.token !== geweigerd.token;
+    return true;
+  }
+
+  // "eigenaar/repo" → adres van monitor.json in de contents-API
+  function monitorUrl(repo) {
+    const deel = String(repo || '').trim().replace(/^https:\/\/github\.com\//, '').replace(/\/+$/, '');
+    if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(deel)) return null;
+    const [eigenaar, naam] = deel.split('/');
+    return `https://api.github.com/repos/${eigenaar}/${naam}/contents/monitor.json`;
+  }
+
+  /* ---- toestanden ---- */
+
+  const HARTSLAG_GRENS = 2; // handelsdagen
+
+  function hartslag(h, nu) {
+    if (!h) return null;
+    const dt = leesTijd(h.tijd);
+    if (h.status === 'fout') return { soort: 'fout', tekst: h.run || '', tijd: dt };
+    if (!dt) return null;
+    const dagen = handelsdagenTussen(dt, nu);
+    if (dagen > HARTSLAG_GRENS) return { soort: 'oud', dagen, tijd: dt };
+    return { soort: 'ok', dagen, tijd: dt };
+  }
+
+  function cadenceLabel(toestand) {
+    if (!toestand) return 'CADENCE';
+    if (toestand.soort === 'fout') return 'CADENCE · FOUT';
+    if (toestand.soort === 'oud') return `CADENCE · ${toestand.dagen} DAGEN OUD`;
+    return `CADENCE ${tijd(toestand.tijd)} · OK`;
+  }
+
+  // de enige zin die de app zelf schrijft (6.1)
+  function oudZin(toestand, dagVanCijfers) {
+    if (!toestand || toestand.soort !== 'oud') return '';
+    const van = datum(dagVanCijfers);
+    return `De laatste run is ${inWoorden(toestand.dagen)} dagen oud.` +
+      (van ? ` De cijfers hieronder zijn van ${van}.` : '');
+  }
+
+  // true = Rest (niets kopen), false = er wordt gekocht, null = onbekend
+  function rust(monitor) {
+    const mf = monitor && monitor.marktfilter;
+    if (!mf || typeof mf.aan !== 'boolean') return null;
+    return mf.aan === false;
+  }
+
+  function thema(keuze, nu) {
+    if (keuze === 'dag' || keuze === 'avond') return keuze;
+    const uur = nu.getHours();
+    return uur >= 19 || uur < 7 ? 'avond' : 'dag';
+  }
+
+  function toestanden({ monitor, nu, offline = false, tokenOngeldig = false }) {
+    const hs = hartslag(monitor && monitor.hartslag, nu);
+    let alarm = null;
+    if (tokenOngeldig) alarm = 'token';
+    else if (hs && hs.soort === 'fout') alarm = 'fout';
+    else if (hs && hs.soort === 'oud') alarm = 'oud';
+    return { rust: rust(monitor), alarm, offline: !!offline, hartslag: hs };
+  }
+
+  /* ---- afgeleiden ---- */
+
+  const isGetal = v => typeof v === 'number' && isFinite(v);
+
+  function standVerschil(stand) {
+    if (!stand || !stand.start) return null;
+    const { portefeuille: p, tracker: t } = stand, k = stand.start.kapitaal;
+    if (!isGetal(p) || !isGetal(t) || !isGetal(k) || k <= 0) return null;
+    return { tenor: p / k - 1, baseline: t / k - 1, verschil: (p - t) / k };
+  }
+
+  const LANGSTE_BALK = 0.58, KORTSTE_BALK = 0.29, KRIMP_PER_PT = 0.15;
+
+  // de langste 58%; de kortste 58% × (1 − 0,15 × verschil in pt), nooit onder 29%
+  function standBalken(stand) {
+    if (!stand || !stand.start) return null;
+    const { portefeuille: p, tracker: t } = stand, k = stand.start.kapitaal;
+    if (!isGetal(p) || !isGetal(t) || !isGetal(k) || k <= 0) return null;
+    const verschilPt = Math.abs(p - t) / k * 100;
+    const kort = Math.max(LANGSTE_BALK * (1 - KRIMP_PER_PT * verschilPt), KORTSTE_BALK);
+    return p >= t ? { tenor: LANGSTE_BALK, baseline: kort } : { tenor: kort, baseline: LANGSTE_BALK };
+  }
+
+  const GEWICHT_VOL = 0.20, AFROOM_GRENS = 0.08, RESTJE_GRENS = 0.01;
+
+  const gewichtBalk = g => (isGetal(g) ? Math.min(Math.max(g / GEWICHT_VOL, 0), 1) : 0);
+  const bovenAfroomgrens = g => isGetal(g) && g > AFROOM_GRENS;
+
+  function gewichtTag(g) {
+    if (!isGetal(g)) return null;
+    if (g > AFROOM_GRENS) return 'AFROOMBAAR';
+    if (g < RESTJE_GRENS) return 'RESTJE';
+    return null;
+  }
+
+  function rendementWeergave(f, { detail = false } = {}) {
+    if (!isGetal(f)) return null;
+    const opEen = Math.round(Math.abs(f) * 1000) / 10;
+    const tekst = pct(f, detail && opEen >= 10 ? 0 : 1, true);
+    return { tekst, positief: tekst.charAt(0) === '+' };
+  }
+
+  function positieLabel(p) {
+    const r = rendementWeergave(p.rendement);
+    return [p.naam || p.ticker, r ? `${r.tekst} sinds instap` : '', isGetal(p.gewicht) ? `gewicht ${pct(p.gewicht, 1)}` : '']
+      .filter(Boolean).join(', ');
+  }
+
+  // Vandaag, rij Rest: het getal zonder teken als de markt eronder staat
+  function maandslotTekst(afstand) {
+    if (!isGetal(afstand)) return '';
+    return afstand < 0
+      ? `maandslot ${pct(Math.abs(afstand), 1)} onder het 10-maandsgemiddelde`
+      : `maandslot ${pct(afstand, 1, true)} boven het 10-maandsgemiddelde`;
+  }
+
+  // een detailscherm blijft alleen staan zolang de naam in de posities staat
+  function detailGeldig(detail, posities) {
+    return !!detail && (posities || []).some(p => p.ticker === detail.ticker);
+  }
+
+  function teken(f) {
+    if (!isGetal(f) || f === 0) return 0;
+    return f > 0 ? 1 : -1;
+  }
+
+  function portefeuilleLijst(posities) {
+    return (posities || []).map((p, i) => [p, i])
+      .sort(([a, i], [b, j]) => {
+        const ga = isGetal(a.gewicht) ? a.gewicht : -Infinity;
+        const gb = isGetal(b.gewicht) ? b.gewicht : -Infinity;
+        return gb - ga || i - j;
+      }).map(([p]) => p);
+  }
+
+  function voortgang(beslisregel) {
+    if (!beslisregel || !isGetal(beslisregel.dag) || !isGetal(beslisregel.van) || beslisregel.van <= 0) return null;
+    return Math.min(Math.max(beslisregel.dag / beslisregel.van, 0), 1);
+  }
+
+  function rijKosten(rij) {
+    const b = isGetal(rij.beurstaks) ? rij.beurstaks : 0;
+    const s = isGetal(rij.spread) ? rij.spread : 0;
+    return isGetal(rij.beurstaks) || isGetal(rij.spread) ? b + s : null;
+  }
+
+  function grootboekPerDag(rijen, ticker = null) {
+    const groepen = new Map();
+    for (const rij of rijen || []) {
+      if (ticker && rij.ticker !== ticker) continue;
+      const sleutel = leesDatum(rij.datum) ? rij.datum : '';
+      if (!groepen.has(sleutel)) groepen.set(sleutel, []);
+      groepen.get(sleutel).push(rij);
+    }
+    return [...groepen.entries()]
+      .sort(([a], [b]) => (a < b ? 1 : a > b ? -1 : 0))
+      .map(([d, r]) => ({ datum: d, rijen: r }));
+  }
+
+  const KANT_WOORD = { KOOP: 'koop', VERKOOP: 'verkoop', AFROMING: 'afroming', TRACKER: 'tracker', DIVIDEND: 'dividend' };
+
+  function transactiesVoorNaam(rijen, ticker) {
+    const eigen = (rijen || []).filter(r => r.ticker === ticker)
+      .sort((a, b) => (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0));
+    const soorten = [...new Set(eigen.map(r => KANT_WOORD[r.kant]).filter(Boolean))];
+    return {
+      aantal: eigen.length,
+      soorten: soorten.join(' · '),
+      lijst: eigen.map(r => [datum(r.datum, 'dagmaand'), stuks(r.aantal)].filter(Boolean).join(' · ')).join(', ')
+    };
+  }
+
+  // datum bij punt i van een reeks; beide lopen oudste eerst en eindigen op dezelfde dag
+  function dagVanPunt(handelsdagen, i, n) {
+    if (!Array.isArray(handelsdagen)) return null;
+    const j = handelsdagen.length - n + i;
+    return j >= 0 && j < handelsdagen.length ? handelsdagen[j] || null : null;
+  }
+
+  /* ---- grafiek ---- */
+
+  // drie rasterlijnen op ronde waarden; het domein valt samen met de buitenste lijnen
+  function raster(waarden) {
+    const reeks = (waarden || []).filter(isGetal);
+    if (!reeks.length) return null;
+    let min = Math.min(...reeks), max = Math.max(...reeks);
+    const ruw = Math.max((max - min) / 2, Math.abs(max) * 0.001, 1e-9);
+    let orde = 10 ** Math.floor(Math.log10(ruw));
+    const stappen = [1, 2, 2.5, 5, 10];
+    let stap = null, onder = null;
+    for (let poging = 0; poging < 4 && stap === null; poging++, orde *= 10) {
+      for (const s of stappen.map(x => x * orde)) {
+        let lo = Math.floor(min / s + 1e-9) * s;
+        if (lo + 2 * s < max - 1e-9) continue;
+        if (min === max && lo === min) lo -= s;
+        stap = s; onder = lo; break;
+      }
+    }
+    const lijnen = [onder, onder + stap, onder + 2 * stap].map(v => Math.round(v / stap * 1e6) / 1e6 * stap);
+    return { lijnen, min: lijnen[0], max: lijnen[2], stap };
+  }
+
+  function schaal(n, rasterInfo, maat) {
+    const { breedte, hoogte, links = 0, rechts = 0, boven = 0, onder = 0 } = maat;
+    const b = breedte - links - rechts, h = hoogte - boven - onder;
+    return {
+      x: i => links + (n <= 1 ? b : (i / (n - 1)) * b),
+      y: v => boven + h - ((v - rasterInfo.min) / (rasterInfo.max - rasterInfo.min)) * h,
+      index: x => (n <= 1 ? 0 : Math.min(n - 1, Math.max(0, Math.round(((x - links) / b) * (n - 1)))))
+    };
+  }
+
+  function pad(waarden, sch) {
+    let d = '', open = false;
+    (waarden || []).forEach((v, i) => {
+      if (!isGetal(v)) { open = false; return; }
+      d += `${open ? 'L' : 'M'}${sch.x(i).toFixed(2)} ${sch.y(v).toFixed(2)}`;
+      open = true;
+    });
+    return d;
+  }
+
+  /* ---- monitor.json lezen ---- */
+
+  const SOORT = {
+    getal: v => (isGetal(v) ? v : undefined),
+    tekst: v => (typeof v === 'string' ? v : undefined),
+    bool: v => (typeof v === 'boolean' ? v : undefined),
+    datum: v => (leesDatum(v) ? v : undefined),
+    datums: v => (Array.isArray(v) ? v.map(x => (leesDatum(x) ? x : null)) : undefined),
+    tijd: v => (leesTijd(v) ? v : undefined),
+    getallen: v => (Array.isArray(v) ? v.map(x => (isGetal(x) ? x : null)) : undefined),
+    status: v => (v === 'ok' || v === 'fout' ? v : undefined),
+    kant: v => (KANT_WOORD[v] ? v : undefined),
+    standpunt: v => (Array.isArray(v) && leesDatum(v[0]) && isGetal(v[1]) && isGetal(v[2]) ? [v[0], v[1], v[2]] : undefined)
+  };
+
+  const TRANSACTIE = { ticker: 'tekst', naam: 'tekst', reden: 'tekst', aantal: 'getal', bedrag: 'getal' };
+
+  const SCHEMA = {
+    hartslag: { tijd: 'tijd', status: 'status', namen: 'getal', laatste_dag: 'datum', run: 'tekst' },
+    stand: {
+      datum: 'datum', zin: 'tekst', portefeuille: 'getal', tracker: 'getal',
+      sinds_start: ['standpunt'], start: { kapitaal: 'getal', datum: 'datum' }
+    },
+    beslisregel: { startdatum: 'datum', oordeeldatum: 'datum', marge_pp: 'getal', dag: 'getal', van: 'getal', oordeel: 'tekst' },
+    marktfilter: { aan: 'bool', afstand: 'getal', maanden_onder: 'getal', bevestiging: 'getal', laatste_maandeinde: 'datum', tekst: 'tekst' },
+    posities: [{
+      ticker: 'tekst', naam: 'tekst', sector: 'tekst', sector_n: 'getal', sector_max: 'getal', aantal: 'getal',
+      koers: 'getal', dagkoers_verandering: 'getal', instap: 'datum', koers_in: 'getal', rendement: 'getal',
+      winst_eur: 'getal', gewicht: 'getal', gewicht_bij_aankoop: 'getal', sma200: 'getal', afstand_sma200: 'getal',
+      rang: 'getal', score: 'getal', in_top60: 'bool', dagen: 'getal', reeks: 'getallen', sma_reeks: 'getallen'
+    }],
+    vandaag: {
+      datum: 'datum', zin: 'tekst', verkopen: [TRANSACTIE], kopen: [{ ...TRANSACTIE, rang: 'getal' }],
+      afromingen: [{ ...TRANSACTIE, voor: 'tekst' }], open_plaatsen: 'getal', cash: 'getal'
+    },
+    grootboek: [{
+      datum: 'datum', ticker: 'tekst', kant: 'kant', aantal: 'getal', koers: 'getal', bedrag: 'getal',
+      beurstaks: 'getal', spread: 'getal', reden: 'tekst'
+    }],
+    kosten: { beurstaks: 'getal', spread: 'getal', omzet: 'getal' },
+    handelsdagen: 'datums',
+    rangorde_datum: 'datum'
+  };
+
+  const isObject = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+  function volgens(schema, waarde) {
+    if (typeof schema === 'string') return SOORT[schema](waarde);
+    if (Array.isArray(schema)) {
+      if (!Array.isArray(waarde)) return undefined;
+      return waarde.map(x => volgens(schema[0], x)).filter(x => x !== undefined);
+    }
+    if (!isObject(waarde)) return undefined;
+    const uit = {};
+    for (const [sleutel, sub] of Object.entries(schema)) {
+      const v = volgens(sub, waarde[sleutel]);
+      if (v !== undefined) uit[sleutel] = v;
+    }
+    return uit;
+  }
+
+  function leesMonitor(invoer) {
+    let ruw = invoer;
+    if (typeof invoer === 'string') {
+      try { ruw = JSON.parse(invoer); } catch (e) { return { ok: false, fout: 'Het bestand monitor.json is geen geldige JSON.' }; }
+    }
+    if (!isObject(ruw)) return { ok: false, fout: 'Het bestand monitor.json heeft niet de verwachte vorm.' };
+    return { ok: true, data: volgens(SCHEMA, ruw) };
+  }
+
+  return {
+    getal, euro, pct, pt, datum, tijd, stuks, dagenTekst, inWoorden, hoofdletter, leesDatum, leesTijd,
+    legeZin, kopieRegel, ophaalSoort, monitorUrl, volgendScherm, magOphalen,
+    rendementWeergave, positieLabel, maandslotTekst, detailGeldig,
+    handelsdagenTussen, relatieveDag, volgendeRun,
+    hartslag, cadenceLabel, oudZin, rust, thema, toestanden,
+    standVerschil, standBalken, gewichtBalk, bovenAfroomgrens, gewichtTag, teken,
+    portefeuilleLijst, voortgang, rijKosten, grootboekPerDag, transactiesVoorNaam,
+    dagVanPunt, raster, schaal, pad, leesMonitor
+  };
+})();
+/* ==== einde model ==== */
+
+/* ==== schermen ==== */
+const Schermen = (() => {
+  'use strict';
+  const m = Model;
+  const isGetal = v => typeof v === 'number' && isFinite(v);
+  const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const S = '\u00a0';
+
+  const staat = {
+    modus: 'app',            // 'laden' | 'instellingen' | 'app'
+    monitor: null, tab: 'stand', detail: null, filter: null,
+    eersteKeer: true, nu: () => new Date(), voorbeeld: false,
+    regel: null,             // null | 'offline' | 'niet-bijgewerkt': de regel onder Cadence
+    opgehaald: null, bezig: false, geweigerd: null,
+    melding: null,           // melding bovenaan Instellingen
+    test: null               // uitkomst van "Token testen"
+  };
+
+  /* ---- vaste beelden ---- */
+
+  const merkSvg = () => `
+    <svg viewBox="0 0 46 28" aria-hidden="true">
+      <rect class="merk-boven s-balk gloeit" x="0" y="4" width="23" height="5" rx="2.5"/>
+      <g class="s-noot"><circle class="merk-noot gloeit" cx="29" cy="6.5" r="3.2"/></g>
+      <rect class="merk-onder s-balk s-later" x="0" y="19" width="46" height="4" rx="2"/>
+    </svg>`;
+
+  const rusttekenSvg = (maat) => `
+    <svg class="rustteken" viewBox="0 0 28 28" width="${maat}" height="${maat}" aria-hidden="true"><path d="M9 4 L17 13 L11 19 L18 25"/></svg>`;
+
+  const ICOON = {
+    stand: '<path d="M3 9h11"/><circle cx="18" cy="9" r="1.6"/><path d="M3 16h18"/>',
+    portefeuille: '<path d="M3 6h18M3 12h13M3 18h8"/>',
+    vandaag: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    grootboek: '<path d="M6 4h12.5v16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h7M8 13h7"/>',
+    terug: '<path d="M15 5l-7 7 7 7"/>',
+    tandwiel: '<path d="M18.99 10.26 L21.51 10.66 L21.51 13.34 L18.99 13.74 L18.17 15.71 L19.67 17.78 L17.78 19.67 L15.71 18.17 L13.74 18.99 L13.34 21.51 L10.66 21.51 L10.26 18.99 L8.29 18.17 L6.22 19.67 L4.33 17.78 L5.83 15.71 L5.01 13.74 L2.49 13.34 L2.49 10.66 L5.01 10.26 L5.83 8.29 L4.33 6.22 L6.22 4.33 L8.29 5.83 L10.26 5.01 L10.66 2.49 L13.34 2.49 L13.74 5.01 L15.71 5.83 L17.78 4.33 L19.67 6.22 L18.17 8.29Z"/><circle cx="12" cy="12" r="3"/>'
+  };
+  const icoon = (naam, label) =>
+    `<svg class="icoon" viewBox="0 0 24 24" ${label ? `role="img" aria-label="${h(label)}"` : 'aria-hidden="true"'}>${ICOON[naam]}</svg>`;
+
+  const TABS = [['stand', 'Stand'], ['portefeuille', 'Portefeuille'], ['vandaag', 'Vandaag'], ['grootboek', 'Grootboek']];
+
+  /* ---- bouwstenen ---- */
+
+  function inzetTeller() {
+    let stap = 0;
+    return (inhoud, klasse = '') => `<div class="inzet ${klasse}" style="--stap:${Math.min(stap++, 6)}">${inhoud}</div>`;
+  }
+
+  const titelRij = (titel, onder) =>
+    `<div class="titel-rij"><h1 class="titel">${h(titel)}</h1>${onder ? `<span class="onderregel">${h(onder)}</span>` : ''}</div>`;
+
+  const zinBlok = (zin, metRust = false) => (zin
+    ? `<div class="zin-blok">${metRust ? rusttekenSvg(30) : ''}<p class="zin">${h(zin)}</p></div>` : '');
+
+  function rij({ titel, sub, subHtml, rechts, rechtsTekst = false, onder = '', knop = null }) {
+    const tag = knop ? 'button' : 'div';
+    const attr = knop ? ` type="button" ${knop}` : '';
+    const subInhoud = subHtml || (sub ? h(sub) : '');
+    return `<${tag} class="rij${onder ? ' met-onder' : ''}"${attr}>
+      <div class="rij-hoofd"><div class="rij-titel">${h(titel)}</div>${subInhoud ? `<div class="rij-sub">${subInhoud}</div>` : ''}</div>
+      ${rechts != null && rechts !== '' ? `<div class="rij-rechts${rechtsTekst ? ' tekst' : ''}">${rechts}</div>` : ''}
+      ${onder}
+    </${tag}>`;
+  }
+
+  const tagHtml = (soort, tekst) => `<span class="tag tag-${soort}">${h(tekst)}</span>`;
+  const KANT_TAG = { KOOP: ['koop', 'KOOP'], VERKOOP: ['verkoop', 'VERKOOP'], AFROMING: ['afroming', 'AFROMING'], TRACKER: ['tracker', 'TRACKER'], DIVIDEND: ['dividend', 'DIVIDEND'] };
+
+  // positief rendement in Gold ink, negatief in Ink met min-teken, nooit rood
+  // de kleur volgt het afgeronde getal: "+0,1%" is Gold ink, "0,0%" en "−0,6%" zijn Ink
+  const rendementHtml = f => {
+    const r = m.rendementWeergave(f);
+    return r ? `<span class="${r.positief ? 'goud-tekst' : ''}">${h(r.tekst)}</span>` : '';
+  };
+
+  function hartslagNu() {
+    const d = staat.monitor || {};
+    return m.hartslag(d.hartslag, staat.nu());
+  }
+
+  function cadenceRechts(hs) {
+    return hs && hs.tijd ? h(m.tijd(hs.tijd)) : '';
+  }
+
+  // eerste deel verschilt per scherm: "koersen van do 10 sep" (Stand) of "gisteren" (Vandaag)
+  function cadenceDelen(eerste, laatste) {
+    const d = staat.monitor || {};
+    const delen = [];
+    if (eerste) delen.push(eerste);
+    if (d.hartslag && isGetal(d.hartslag.namen)) delen.push(`${m.getal(d.hartslag.namen)} namen`);
+    if (laatste) delen.push(laatste);
+    return delen.join(' · ');
+  }
+
+  // 6.2: onder de Cadence-rij, alleen als de laatste poging niet lukte
+  const kopieRegelHtml = () => (staat.regel ? `<p class="kopie-regel">${h(m.kopieRegel(staat.regel, staat.opgehaald, staat.nu()))}</p>` : '');
+
+  function restRechts(rust, kort) {
+    if (rust === true) return `<span class="met-teken goud-tekst">${rusttekenSvg(16)}${kort ? 'actief' : 'actief · niets kopen'}</span>`;
+    return `<span class="goud-tekst">${kort ? 'geen' : 'geen · er wordt gekocht'}</span>`;
+  }
+
+  /* ---- grafiek ---- */
+
+  const grafieken = new Map();
+  let grafiekTeller = 0;
+
+  function grafiekHtml({ reeksen, noot, maat, label, aflezing, onder, extraSvg = () => '' }) {
+    const alle = reeksen.flatMap(r => r.waarden);
+    const r = m.raster(alle);
+    if (!r) return '';
+    const n = Math.max(...reeksen.map(x => x.waarden.length));
+    const asLabels = r.lijnen.map(v => maat.asLabel(v));
+    // as-labels in een eigen strook links, zodat de lijnen er nooit doorheen lopen
+    const goot = Math.ceil(Math.max(...asLabels.map(t => t.length)) * 6.6) + 10;
+    maat = { ...maat, links: goot };
+    const sch = m.schaal(n, r, maat);
+    const id = `grafiek-${++grafiekTeller}`;
+    const raster = r.lijnen.map((v, i) => {
+      const y = sch.y(v).toFixed(2);
+      return `<line class="raster" x1="${goot - 4}" x2="${maat.breedte}" y1="${y}" y2="${y}"/>
+        <text class="as-tekst" x="0" y="${y}" dominant-baseline="central">${h(asLabels[i])}</text>`;
+    }).join('');
+    const lijnen = reeksen.map(x =>
+      `<path class="reeks ${x.klasse} s-lijn${x.later ? ' s-later' : ''}" pathLength="1" d="${m.pad(x.waarden, sch)}"/>`).join('');
+    let nootHtml = '';
+    const nr = reeksen[noot];
+    if (nr) {
+      let i = nr.waarden.length - 1;
+      while (i >= 0 && !isGetal(nr.waarden[i])) i--;
+      if (i >= 0) nootHtml = `<g class="s-noot"><circle class="noot gloeit" cx="${sch.x(i).toFixed(2)}" cy="${sch.y(nr.waarden[i]).toFixed(2)}" r="4.5"/></g>`;
+    }
+    grafieken.set(id, { sch, n, aflezing, maat });
+    return `
+      <div class="aflezing" id="${id}-aflezing" aria-hidden="true"></div>
+      <div class="grafiek" data-grafiek="${id}">
+        <svg viewBox="0 0 ${maat.breedte} ${maat.hoogte}" role="img" aria-label="${h(label)}">
+          ${raster}${extraSvg(sch)}${lijnen}${nootHtml}
+          <line class="peil" id="${id}-peil" x1="0" x2="0" y1="0" y2="${maat.hoogte}" visibility="hidden"/>
+        </svg>
+      </div>
+      <div class="as-onder"><span>${h(onder[0])}</span><span>${h(onder[1])}</span></div>`;
+  }
+
+  function koppelGrafieken(wortel) {
+    wortel.querySelectorAll('[data-grafiek]').forEach(el => {
+      const info = grafieken.get(el.dataset.grafiek);
+      if (!info) return;
+      const svg = el.querySelector('svg');
+      const peil = svg.querySelector('.peil');
+      const uit = document.getElementById(`${el.dataset.grafiek}-aflezing`);
+      const toon = e => {
+        const kader = svg.getBoundingClientRect();
+        const x = (e.clientX - kader.left) / kader.width * info.maat.breedte;
+        const i = info.sch.index(x);
+        const px = info.sch.x(i).toFixed(2);
+        peil.setAttribute('x1', px); peil.setAttribute('x2', px); peil.setAttribute('visibility', 'visible');
+        uit.innerHTML = info.aflezing(i);
+        uit.classList.add('zichtbaar');
+      };
+      const verberg = () => { peil.setAttribute('visibility', 'hidden'); uit.classList.remove('zichtbaar'); };
+      el.addEventListener('pointerdown', e => { toon(e); el.setPointerCapture && el.setPointerCapture(e.pointerId); });
+      el.addEventListener('pointermove', e => { if (peil.getAttribute('visibility') === 'visible') toon(e); });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => el.addEventListener(t, verberg));
+    });
+  }
+
+  const rondBedrag = v => m.euro(v);
+  const rondeKoers = v => {
+    const dec = Math.abs(v) < 10 && !Number.isInteger(v) ? 2 : Number.isInteger(v) ? 0 : 1;
+    return m.euro(v, dec);
+  };
+
+  /* ---- 5.1 Stand ---- */
+
+  function scherm_stand(d) {
+    const blok = inzetTeller();
+    const st = d.stand || {};
+    const v = m.standVerschil(st), b = m.standBalken(st);
+    const hs = hartslagNu();
+    let html = '';
+    // 6.1: bij een oude run schrijft de app zelf de openingszin; bij een fout komt de runtekst onder de zin
+    if (hs && hs.soort === 'oud') {
+      html += blok(`<div class="zin-blok"><p class="zin alarm">${h(m.oudZin(hs, (d.hartslag && d.hartslag.laatste_dag) || st.datum))}</p></div>`);
+    } else {
+      const zin = st.zin ? zinBlok(st.zin) : '';
+      const fout = hs && hs.soort === 'fout' && hs.tekst ? `<p class="zin-extra alarm">${h(hs.tekst)}</p>` : '';
+      if (zin || fout) html += blok(zin + fout);
+    }
+
+    if (v) {
+      html += blok(`<div class="held-blok">
+        <div class="label">Tenor boven Baseline · na kosten</div>
+        <div class="held" aria-label="${h(m.pt(v.verschil))} procentpunt">${h(m.pt(v.verschil))}<span class="eenheid">pt</span></div>
+      </div>`);
+    }
+
+    if (b && v) {
+      html += blok(`<div class="balken">
+        <div class="balkrij"><span class="balk tenor s-balk gloeit" style="width:${(b.tenor * 100).toFixed(2)}%"></span>
+          <span class="balkwaarde">${h(m.euro(st.portefeuille))} ${rendementHtml(v.tenor)}</span></div>
+        <div class="balkrij"><span class="balk baseline s-balk s-later" style="width:${(b.baseline * 100).toFixed(2)}%"></span>
+          <span class="balkwaarde gedimd">${h(m.euro(st.tracker))} ${h(m.pct(v.baseline, 1, true))}</span></div>
+        <div class="legende"><span class="label goud">Tenor</span><span class="label">Baseline · EXSA.DE</span></div>
+      </div>`);
+    }
+
+    const punten = st.sinds_start || [];
+    if (punten.length) {
+      const tenor = punten.map(p => p[1]), base = punten.map(p => p[2]);
+      const grafiek = grafiekHtml({
+        reeksen: [{ waarden: tenor, klasse: 'tenor' }, { waarden: base, klasse: 'baseline', later: true }],
+        noot: 0,
+        maat: { breedte: 350, hoogte: 140, links: 0, rechts: 6, boven: 16, onder: 6, asLabel: rondBedrag },
+        label: `Tenor en Baseline sinds ${m.datum(punten[0][0], 'dm')}: Tenor ${m.euro(tenor[tenor.length - 1])}, Baseline ${m.euro(base[base.length - 1])}`,
+        onder: [m.datum(punten[0][0], 'as'), 'nu'],
+        aflezing: i => `${h(m.datum(punten[i][0], 'as'))} · <span class="goud-tekst">${h(m.euro(tenor[i]))}</span> · <span style="color:var(--mute)">${h(m.euro(base[i]))}</span>`,
+        extraSvg: () => ''
+      });
+      html += blok(`<div class="lijn"></div><div class="grafiek-blok">${grafiek}</div>`);
+    }
+
+    const rijen = [];
+    const br = d.beslisregel;
+    if (br && isGetal(br.dag) && isGetal(br.van)) {
+      const sub = [br.oordeeldatum ? `oordeel ${m.datum(br.oordeeldatum, 'dmj')}` : '',
+        isGetal(br.marge_pp) ? `stop bij ${m.getal(-br.marge_pp)}${S}pt` : ''].filter(Boolean).join(' · ');
+      const vg = m.voortgang(br);
+      rijen.push(rij({
+        titel: 'Beslisregel', sub, rechts: `dag ${h(m.getal(br.dag))} / ${h(m.getal(br.van))}`,
+        onder: vg != null ? `<div class="voortgang"><span class="s-balk" style="width:${(vg * 100).toFixed(2)}%"></span></div>` : ''
+      }));
+    }
+    const rust = m.rust(d);
+    if (rust !== null) {
+      const af = d.marktfilter.afstand;
+      rijen.push(rij({ titel: 'Rest', sub: isGetal(af) ? `marktfilter · maandslot ${m.pct(af, 1, true)}` : '', rechts: restRechts(rust, false), rechtsTekst: true }));
+    }
+    const k = d.kosten;
+    if (k && isGetal(k.beurstaks) && isGetal(k.spread)) {
+      const start = st.start && st.start.datum;
+      rijen.push(rij({ titel: 'Betaalde kosten', sub: start ? `beurstaks en spread sinds ${m.datum(start, 'dm')}` : 'beurstaks en spread', rechts: h(m.euro(k.beurstaks + k.spread)) }));
+    }
+    if (hs && hs.tijd) {
+      const koersen = st.datum ? `koersen van ${m.datum(st.datum, 'wdm')}` : '';
+      rijen.push(rij({ titel: 'Cadence', sub: cadenceDelen(koersen, `volgende ${m.volgendeRun(hs.tijd, staat.nu())}`), rechts: cadenceRechts(hs) }));
+    }
+    if (rijen.length) html += blok(`<div class="rijen">${rijen.join('')}</div>${kopieRegelHtml()}`);
+    return html;
+  }
+
+  /* ---- 5.2 Portefeuille ---- */
+
+  function scherm_portefeuille(d) {
+    const blok = inzetTeller();
+    const lijst = m.portefeuilleLijst(d.posities);
+    const onder = d.posities ? `${lijst.length} ${lijst.length === 1 ? 'positie' : 'posities'}` : '';
+    let html = `<div class="vast">${blok(titelRij('Portefeuille', onder))}` +
+      blok(`<div class="legende-rij">
+        <span class="label goud"><span class="blokje goud"></span>Boven 8%</span>
+        <span class="label"><span class="blokje grafiet"></span>Gewicht</span>
+        <span class="label">% sinds instap</span>
+      </div>`) + '</div>';
+    const rijen = lijst.map(p => {
+      const tag = m.gewichtTag(p.gewicht);
+      return `<button type="button" class="rij positie" data-ticker="${h(p.ticker)}" aria-label="${h(m.positieLabel(p))}">
+        <div class="positie-lijn">
+          <span class="ticker">${h(p.ticker)}</span>
+          <span class="naam">${h(p.naam)}</span>
+          ${tag ? tagHtml(tag === 'AFROOMBAAR' ? 'afroombaar' : 'restje', tag) : ''}
+          ${isGetal(p.rendement) ? `<span class="rendement">${rendementHtml(p.rendement)}</span>` : ''}
+          ${isGetal(p.gewicht) ? `<span class="gewicht">${h(m.pct(p.gewicht, 1))}</span>` : ''}
+        </div>
+        ${isGetal(p.gewicht) ? `<div class="gewichtspoor"><span class="${m.bovenAfroomgrens(p.gewicht) ? 'boven' : ''}" style="width:${(m.gewichtBalk(p.gewicht) * 100).toFixed(2)}%"></span></div>` : ''}
+      </button>`;
+    }).join('');
+    // cash is de laatste rij ván de portefeuille, ook bij € 0: "volledig belegd" is informatie
+    const cash = d.vandaag && isGetal(d.vandaag.cash)
+      ? `<div class="rij cash"><span class="label">Cash</span><span class="rij-rechts">${h(m.euro(d.vandaag.cash))}</span></div>` : '';
+    html += blok(`<div class="rijen">${rijen}${cash}</div>`);
+    return html;
+  }
+
+  /* ---- 5.3 Vandaag ---- */
+
+  function scherm_vandaag(d) {
+    const blok = inzetTeller();
+    const vd = d.vandaag || {};
+    const rust = m.rust(d);
+    let html = blok(titelRij('Vandaag', m.datum(vd.datum)));
+    if (vd.zin) html += blok(zinBlok(vd.zin, rust === true));
+
+    const secties = [['verkopen', 'Verkopen', 'verkoop', 'VERKOOP'], ['kopen', 'Kopen', 'koop', 'KOOP'], ['afromingen', 'Afromingen', 'afroming', 'AFROMING']];
+    const sectieHtml = secties.map(([sleutel, titel, soort, tekst]) => {
+      if (!Array.isArray(vd[sleutel])) return '';
+      const rijen = vd[sleutel];
+      const inhoud = rijen.length ? rijen.map(t => {
+        const rechts = [isGetal(t.aantal) ? m.stuks(t.aantal) : '', isGetal(t.bedrag) ? m.euro(t.bedrag) : ''].filter(Boolean).join(' · ');
+        const reden = t.reden || (t.voor ? `voor ${t.voor}` : '');
+        return `<div class="rij transactie">
+          <div class="rij-hoofd">
+            <div class="positie-lijn">${tagHtml(soort, tekst)}<span class="ticker">${h(t.ticker)}</span><span class="naam">${h(t.naam)}</span></div>
+            ${reden ? `<div class="reden">${h(reden)}</div>` : ''}
+          </div>
+          ${rechts ? `<div class="rij-rechts">${h(rechts)}</div>` : ''}
+        </div>`;
+      }).join('') : `<p class="leeg">${h(m.legeZin(sleutel, { rust: rust === true, open_plaatsen: vd.open_plaatsen, cash: vd.cash }))}</p>`;
+      return `<section class="sectie"><div class="sectie-kop"><span class="label">${titel}</span><span class="label">${rijen.length}</span></div>${inhoud}</section>`;
+    }).join('');
+    if (sectieHtml) html += blok(sectieHtml);
+
+    const onder = [];
+    if (rust !== null) {
+      const af = d.marktfilter.afstand;
+      const subHtml = h(m.maandslotTekst(af)).replace('het 10-maandsgemiddelde', '<span class="heel">het 10-maandsgemiddelde</span>');
+      onder.push(rij({ titel: 'Rest', subHtml, rechts: restRechts(rust, true), rechtsTekst: true }));
+    }
+    const hs = hartslagNu();
+    if (hs && hs.tijd) {
+      const peil = d.rangorde_datum;
+      onder.push(rij({ titel: 'Cadence', sub: cadenceDelen(m.relatieveDag(hs.tijd, staat.nu()), peil ? `rangorde ${m.datum(peil, 'dagmaand')}` : ''), rechts: `<span class="stip"></span>${cadenceRechts(hs)}` }));
+    }
+    if (onder.length) html += blok(`<div class="rijen" style="margin-top:24px">${onder.join('')}</div>${kopieRegelHtml()}`);
+    return html;
+  }
+
+  /* ---- 5.5 Grootboek ---- */
+
+  function scherm_grootboek(d) {
+    const blok = inzetTeller();
+    const tickers = new Set((d.posities || []).map(p => p.ticker));
+    const filter = staat.filter;
+    const groepen = m.grootboekPerDag(d.grootboek, filter);
+    const aantal = groepen.reduce((a, g) => a + g.rijen.length, 0);
+    const onder = d.grootboek ? `${aantal} ${aantal === 1 ? 'transactie' : 'transacties'}${filter ? ` · ${filter}` : ''}` : '';
+    let html = blok(titelRij('Grootboek', onder));
+    const k = d.kosten;
+    if (k) {
+      const kolom = (label, waarde) => (waarde ? `<div><div class="label">${label}</div><div class="strook-waarde">${h(waarde)}</div></div>` : '');
+      const inhoud = kolom('Beurstaks', isGetal(k.beurstaks) ? m.euro(k.beurstaks) : '') +
+        kolom('Spread', isGetal(k.spread) ? m.euro(k.spread) : '') +
+        kolom('Omzet', isGetal(k.omzet) ? `${m.getal(k.omzet, 1)}×` : '');
+      if (inhoud) html += blok(`<div class="strook">${inhoud}</div>`);
+    }
+    const dagen = groepen.map(g => `<section class="dag">
+      ${g.datum ? `<div class="label">${h(m.datum(g.datum, 'lang'))}</div>` : ''}
+      ${g.rijen.map(r => {
+        const [soort, tekst] = KANT_TAG[r.kant] || [];
+        const som = [isGetal(r.aantal) ? m.getal(r.aantal) : null, isGetal(r.koers) ? m.getal(r.koers, 2) : null];
+        let bedrag = som[0] && som[1] ? `${som[0]} × ${som[1]}` : '';
+        if (isGetal(r.bedrag)) bedrag += `${bedrag ? ' = ' : ''}${m.euro(r.bedrag)}`;
+        const kosten = m.rijKosten(r);
+        const klikbaar = tickers.has(r.ticker);
+        const tag = klikbaar ? 'button' : 'div';
+        return `<${tag} class="rij"${klikbaar ? ` type="button" data-ticker="${h(r.ticker)}" data-herkomst="grootboek"` : ''}>
+          <div class="rij-hoofd"><div class="positie-lijn">${soort ? tagHtml(soort, tekst) : ''}<span class="ticker">${h(r.ticker)}</span></div></div>
+          <div class="rij-rechts">${h(bedrag)}${kosten != null ? `<span class="klein">kosten ${h(m.euro(kosten))}</span>` : ''}</div>
+        </${tag}>`;
+      }).join('')}
+    </section>`).join('');
+    html += blok(dagen);
+    return html;
+  }
+
+  /* ---- 5.6 Detail ---- */
+
+  function scherm_detail(d) {
+    const blok = inzetTeller();
+    const p = (d.posities || []).find(x => x.ticker === staat.detail.ticker);
+    if (!p) return '';
+    const meta = [p.ticker, p.sector, isGetal(p.sector_n) && isGetal(p.sector_max) ? `${p.sector_n} van ${p.sector_max}` : ''].filter(Boolean).join(' · ');
+    const tag = m.bovenAfroomgrens(p.gewicht) ? tagHtml('afroombaar', 'AFROOMBAAR') : '';
+    let html = blok(`<div class="detail-kop"><div class="detail-meta">${h(meta)}</div>
+      <div class="detail-naam"><h1 class="titel">${h(p.naam || p.ticker)}</h1>${tag}</div></div>`);
+
+    const koers = isGetal(p.koers) ? `<div><div class="label">Koers</div><div class="kolom-waarde">${h(m.euro(p.koers, 2))}</div>
+      ${isGetal(p.dagkoers_verandering) ? `<div class="kolom-sub">vandaag ${h(m.pct(p.dagkoers_verandering, 1, true))}</div>` : ''}</div>` : '<div></div>';
+    let winst = '';
+    if (isGetal(p.winst_eur)) winst = p.winst_eur < 0 ? `${m.euro(-p.winst_eur)} verlies` : `${m.euro(p.winst_eur)} winst`;
+    const r = m.rendementWeergave(p.rendement, { detail: true });
+    const instap = r ? `<div><div class="label">Sinds instap</div>
+      <div class="kolom-waarde${r.positief ? ' goud' : ''}">${h(r.tekst)}</div>
+      ${winst ? `<div class="kolom-sub">${h(winst)}</div>` : ''}</div>` : '';
+    html += blok(`<div class="kolommen">${koers}${instap}</div>`);
+
+    if (isGetal(p.gewicht) || isGetal(p.gewicht_bij_aankoop)) {
+      const balk = (klasse, g, tekst, later) => (isGetal(g) ? `<div class="spoor"><span class="balk ${klasse} s-balk${later ? ' s-later' : ''}${klasse === 'tenor' ? ' gloeit' : ''}" style="width:${(m.gewichtBalk(g) * 100).toFixed(2)}%"></span></div>
+        <span class="balkwaarde${klasse === 'baseline' ? ' gedimd' : ''}">${h(m.pct(g, 1))} ${tekst}</span>` : '');
+      html += blok(`<div class="balkgrid">${balk('tenor', p.gewicht, 'gewicht')}${balk('baseline', p.gewicht_bij_aankoop, 'bij aankoop', true)}</div>`);
+    }
+
+    const reeks = p.reeks || [], sma = p.sma_reeks || [];
+    if (reeks.some(isGetal)) {
+      const n = reeks.length;
+      const smaLabel = sch => {
+        let i = sma.length - 1;
+        while (i >= 0 && !isGetal(sma[i])) i--;
+        if (i < 0 || !isGetal(p.afstand_sma200)) return '';
+        // onder de SMA-lijn als de koers erboven staat, erboven als de koers eronder staat; nooit door de lijn
+        const kLaatste = [...reeks].reverse().find(isGetal);
+        const erOnder = isGetal(kLaatste) && kLaatste >= sma[i];
+        const rechts = sch.x(i) - 10, breedte = 15 * 7.9;
+        const ys = sma.map((v, j) => (isGetal(v) && sch.x(j) >= rechts - breedte && sch.x(j) <= rechts ? sch.y(v) : null)).filter(v => v !== null);
+        let y = erOnder ? Math.max(...ys) + 15 : Math.min(...ys) - 7;
+        if (y > 150 - 2) y = Math.min(...ys) - 7;
+        if (y < 10) y = Math.max(...ys) + 15;
+        return `<text class="sma-label" x="${rechts.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="end">SMA200 · ${h(m.pct(p.afstand_sma200, 0, true))}</text>`;
+      };
+      const grafiek = grafiekHtml({
+        reeksen: [{ waarden: reeks, klasse: 'tenor' }, { waarden: sma, klasse: 'sma', later: true }],
+        noot: 0,
+        maat: { breedte: 350, hoogte: 150, links: 0, rechts: 6, boven: 16, onder: 6, asLabel: rondeKoers },
+        label: `Koers en SMA200 over 200 dagen: koers ${m.euro(p.koers, 2)}${isGetal(p.sma200) ? `, SMA200 ${m.euro(p.sma200, 2)}` : ''}`,
+        onder: ['200 dagen geleden', 'nu'],
+        aflezing: i => `${[m.datum(m.dagVanPunt(d.handelsdagen, i, n), 'wdm')].filter(Boolean).map(t => `${h(t)} · `).join('')}<span class="goud-tekst">koers ${h(m.euro(reeks[i], 2))}</span>${isGetal(sma[i]) ? ` · <span style="color:var(--mute)">SMA ${h(m.euro(sma[i], 2))}</span>` : ''}`,
+        extraSvg: smaLabel
+      });
+      html += blok(`<div class="grafiek-blok">${grafiek}
+        <div class="legende"><span class="label goud">Koers</span><span class="label">SMA200 · verkoopdrempel</span></div></div>`);
+    }
+
+    const rijen = [];
+    if (p.instap) {
+      rijen.push(rij({ titel: 'Instap', sub: isGetal(p.dagen) ? `${m.dagenTekst(p.dagen)} in bezit` : '',
+        rechts: h([m.datum(p.instap, 'cijfers'), isGetal(p.koers_in) ? m.euro(p.koers_in, 2) : ''].filter(Boolean).join(' · ')) }));
+    }
+    if (isGetal(p.rang) || isGetal(p.score)) {
+      const peil = d.rangorde_datum;
+      const top = typeof p.in_top60 === 'boolean' ? (p.in_top60 ? 'blijft in de top-60' : 'uit de top-60: verkoopregel geldt') : '';
+      rijen.push(rij({ titel: 'Rangorde', sub: [peil ? `van ${m.datum(peil, 'dagmaand')}` : '', top].filter(Boolean).join(' · '),
+        rechts: h([isGetal(p.rang) ? `rang ${p.rang}` : '', isGetal(p.score) ? `score ${p.score}` : ''].filter(Boolean).join(' · ')) }));
+    }
+    const t = m.transactiesVoorNaam(d.grootboek, p.ticker);
+    if (t.aantal) {
+      rijen.push(rij({ titel: 'Transacties', sub: t.lijst, rechts: h(t.soorten), rechtsTekst: true, knop: `data-filter="${h(p.ticker)}"` }));
+    }
+    if (rijen.length) html += blok(`<div class="rijen" style="margin-top:8px">${rijen.join('')}</div>`);
+    return html;
+  }
+
+  /* ---- 6.2 Laden ---- */
+
+  const WACHT_NA = 8000;
+  const WACHTREGEL = '<p class="laden-wacht">Geen verbinding. Tenor wacht op het netwerk.</p>';
+
+  function scherm_laden() {
+    if (!staat.ladenSinds) staat.ladenSinds = Date.now();
+    const lang = Date.now() - staat.ladenSinds >= WACHT_NA;
+    return `<div class="laden">
+      <div class="merk groot" aria-hidden="true">${merkSvg()}</div>
+      <p class="zin">Tenor haalt de stand op.</p>${lang ? WACHTREGEL : ''}
+    </div>`;
+  }
+
+  // de regel komt erbij zonder het scherm opnieuw te tekenen, zodat de strijk niet herbegint
+  function wachtOpLaden() {
+    clearTimeout(wachtOpLaden.klok);
+    if (staat.modus !== 'laden') { staat.ladenSinds = null; return; }
+    const rest = WACHT_NA - (Date.now() - staat.ladenSinds);
+    wachtOpLaden.klok = setTimeout(() => {
+      const laden = document.querySelector('.laden');
+      if (staat.modus === 'laden' && laden && !laden.querySelector('.laden-wacht')) laden.insertAdjacentHTML('beforeend', WACHTREGEL);
+    }, Math.max(rest, 0));
+  }
+
+  /* ---- 5.7 Instellingen ---- */
+
+  const VERSIE = '0.4.0';  // gelijk houden met VERSIE in sw.js
+  const TEST_ZIN = {
+    ok: 'Het token werkt.',
+    token: 'GitHub weigert dit token. Maak een nieuw aan met alleen contents: read.',
+    offline: 'Geen verbinding. Probeer opnieuw zodra je online bent.',
+    'time-out': 'GitHub antwoordt niet. Probeer opnieuw.',
+    onvolledig: 'Vul eigenaar/repo en het leestoken in.'
+  };
+
+  function instellingenVakken() {
+    const test = staat.test;
+    const nietGevonden = staat.melding === 'niet-gevonden' || (test && test.soort === 'niet-gevonden');
+    let testZin = '';
+    if (test && test.soort !== 'niet-gevonden') {
+      testZin = test.fout || TEST_ZIN[test.soort] || `GitHub antwoordde met ${test.status}. Probeer later opnieuw.`;
+    }
+    return {
+      melding: staat.melding === 'token' ? '<p class="zin-extra alarm melding">Het leestoken werkt niet.</p>' : '',
+      repo: nietGevonden ? '<p class="veld-regel">Niet gevonden — klopt de repo of het pad?</p>' : '',
+      test: testZin ? `<span class="${test.soort === 'token' ? 'alarm' : ''}">${h(testZin)}</span>` : '',
+      kopie: staat.opgehaald ? `kopie van ${m.datum(m.leesTijd(staat.opgehaald), 'wdm')} ${m.tijd(staat.opgehaald)}` : 'geen kopie'
+    };
+  }
+
+  function scherm_instellingen() {
+    const blok = inzetTeller();
+    const ins = Instellingen.lees();
+    const vak = instellingenVakken();
+    let html = blok(titelRij('Instellingen', '') + `<div data-vak="melding">${vak.melding}</div>`);
+    html += blok(`
+      <label class="veld"><span class="label">Eigenaar/repo</span>
+        <input class="invoer" data-veld="repo" type="text" value="${h(ins.repo)}" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+      <div class="veld-onder" data-vak="repo">${vak.repo}</div>
+      <label class="veld"><span class="label">Leestoken</span>
+        <input class="invoer" data-veld="token" type="password" value="${h(ins.token)}" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+      <div class="rijen">${rij({ titel: 'Token testen', subHtml: `<span data-vak="test">${vak.test}</span>`, knop: 'data-actie="test"' })}</div>`);
+
+    const keuzes = [['automatisch', 'Automatisch'], ['dag', 'Dag'], ['avond', 'Avond']].map(([k, naam]) =>
+      `<button type="button" class="keuze" data-thema-keuze="${k}" aria-pressed="${ins.thema === k}">
+        <span class="label">${naam}</span><span class="tabnoot"></span></button>`).join('');
+    html += blok(`<div class="veld"><span class="label">Thema</span><div class="keuzes" role="group" aria-label="Thema">${keuzes}</div></div>`);
+
+    html += blok(`<div class="rijen ruimte">
+      ${rij({ titel: 'Versie', subHtml: `<span data-vak="kopie">${h(vak.kopie)}</span>`, rechts: h(VERSIE) })}
+      ${rij({ titel: 'Laatste kopie wissen', knop: 'data-actie="wis"' })}
+    </div>`);
+    return html;
+  }
+
+  // werkt meldingen, regels en kop bij terwijl de velden (en hun focus) blijven staan
+  function werkInstellingenBij() {
+    const vak = instellingenVakken();
+    for (const [naam, html] of Object.entries(vak)) {
+      const el = document.querySelector(`[data-vak="${naam}"]`);
+      if (el) el.innerHTML = naam === 'kopie' ? h(html) : html;
+    }
+    zetHtml(document.getElementById('kop'), kopHtml());
+    const tabbalk = document.getElementById('tabbalk');
+    zetHtml(tabbalk, tabbalkHtml());
+    tabbalk.hidden = tabbalk.innerHTML === '';
+  }
+
+  /* ---- kop, tabbalk, tekenen ---- */
+
+  const TAB_NAAM = Object.fromEntries(TABS);
+  const merkHtml = langeDruk =>
+    `<div class="merk" id="merk"${langeDruk ? ' data-lange-druk' : ''} aria-label="Tenor">${merkSvg()}<span class="merk-woord">TENOR</span></div>`;
+  const terugHtml = (label, attr) =>
+    `<button type="button" class="terug" ${attr}>${icoon('terug')}<span class="label terug-label">${h(label)}</span></button>`;
+
+  function kopHtml() {
+    if (staat.modus === 'laden') return '';
+    const ins = Instellingen.lees();
+    const hs = staat.monitor ? hartslagNu() : null;
+    const cadence = staat.monitor
+      ? `<span class="cadence${hs && hs.soort !== 'ok' ? ' alarm' : ''}">${h(m.cadenceLabel(hs))}</span>` : '';
+    let links;
+    if (staat.modus === 'instellingen') {
+      // zonder kopie is er niets om naar terug te keren
+      links = staat.monitor ? terugHtml(TAB_NAAM[staat.tab], 'data-sluit-instellingen') : merkHtml(false);
+    } else if (staat.detail) {
+      links = terugHtml(staat.detail.herkomst === 'grootboek' ? 'Grootboek' : 'Portefeuille', 'data-terug');
+    } else if (staat.tab === 'grootboek' && staat.filter) {
+      links = terugHtml('Grootboek', 'data-filter-weg');
+    } else {
+      links = merkHtml(true);
+    }
+    const tandwiel = staat.modus === 'app' && !staat.detail && staat.tab === 'stand' && !ins.token
+      ? `<button type="button" class="tandwiel" data-open-instellingen aria-label="Instellingen">${icoon('tandwiel')}</button>` : '';
+    return `${links}<div class="kop-rechts">${cadence}${tandwiel}</div>`;
+  }
+
+  function tabbalkHtml() {
+    if (staat.modus === 'laden' || (staat.modus === 'instellingen' && !staat.monitor)) return '';
+    return TABS.map(([sleutel, naam]) =>
+      `<button type="button" class="tab" data-tab="${sleutel}"${staat.modus === 'app' && staat.tab === sleutel ? ' aria-current="page"' : ''}>
+        ${icoon(sleutel)}<span class="label">${naam}</span><span class="tabnoot"></span>
+      </button>`).join('');
+  }
+
+  // vervang alleen wat veranderd is, zodat een lopende strijk in de kop niet herbegint
+  const vorige = new Map();
+  function zetHtml(el, html) {
+    if (vorige.get(el) === html) return;
+    vorige.set(el, html);
+    el.innerHTML = html;
+  }
+
+  function teken({ beweging = null, stil = false } = {}) {
+    const d = staat.monitor || {};
+    const app = document.getElementById('app'), kop = document.getElementById('kop');
+    const scherm = document.getElementById('scherm'), tabbalk = document.getElementById('tabbalk');
+    grafieken.clear();
+    Thema.rust(!!staat.monitor && m.rust(d) === true);
+    app.dataset.modus = staat.modus;
+    zetHtml(kop, kopHtml());
+    zetHtml(tabbalk, tabbalkHtml());
+    tabbalk.hidden = tabbalk.innerHTML === '';
+    app.style.setProperty('--kophoogte', `${scherm.offsetTop}px`);
+
+    if (staat.detail && !m.detailGeldig(staat.detail, d.posities)) {
+      staat.detail = null;                       // naam niet meer in portefeuille: terug naar waar je vandaan kwam
+      zetHtml(kop, kopHtml());
+      zetHtml(tabbalk, tabbalkHtml());
+    }
+
+    let inhoud;
+    if (staat.modus === 'laden') inhoud = scherm_laden();
+    else if (staat.modus === 'instellingen') inhoud = scherm_instellingen();
+    else if (staat.detail) inhoud = scherm_detail(d);
+    else inhoud = ({ stand: scherm_stand, portefeuille: scherm_portefeuille, vandaag: scherm_vandaag, grootboek: scherm_grootboek })[staat.tab](d);
+
+    const scroll = scherm.scrollTop;
+    scherm.innerHTML = `<div class="schermvlak${stil ? ' stil' : ''}${beweging ? ' ' + beweging : ''}">${inhoud}</div>`;
+    scherm.scrollTop = stil ? scroll : 0;
+
+    // 1. Strijk: alleen bij openen
+    if (staat.eersteKeer && !stil) {
+      staat.eersteKeer = false;
+      app.classList.add('strijken');
+      clearTimeout(teken.strijkKlok);
+      teken.strijkKlok = setTimeout(() => app.classList.remove('strijken'), 2400);
+    }
+    koppelGrafieken(scherm);
+    wachtOpLaden();
+  }
+
+  /* ---- vernieuwen ---- */
+
+  function toonInstellingen(melding = null) {
+    staat.melding = melding;
+    staat.test = null;
+    staat.modus = 'instellingen';
+    staat.detail = null;
+    teken();
+  }
+
+  function sluitInstellingen() {
+    if (!staat.monitor) return;
+    staat.melding = null;
+    staat.test = null;
+    staat.modus = 'app';
+    teken();
+    vernieuw();
+  }
+
+  function neemAan(tekst, opgehaald) {
+    const gelezen = m.leesMonitor(tekst);
+    if (!gelezen.ok) return gelezen;
+    const nieuw = tekst !== staat.tekst;
+    staat.tekst = tekst;
+    staat.monitor = gelezen.data;
+    staat.opgehaald = opgehaald;
+    Ophalen.bewaarKopie(tekst, opgehaald);
+    return { ok: true, nieuw };
+  }
+
+  // antwoord van GitHub → uitkomst voor het model; onthoudt wat geweigerd werd
+  function uitkomstVan(r, ins) {
+    let uitkomst = r.soort, nieuw = false, fout = null;
+    if (r.soort === 'ok') {
+      const uit = neemAan(r.tekst, new Date().toISOString());
+      if (uit.ok) nieuw = uit.nieuw; else { uitkomst = 'kapot'; fout = uit.fout; }
+    }
+    if (uitkomst === 'token') staat.geweigerd = { soort: 'token', token: ins.token };
+    if (uitkomst === 'ok') staat.geweigerd = null;
+    return { uitkomst, nieuw, fout };
+  }
+
+  async function vernieuw({ zelf = false } = {}) {
+    if (staat.voorbeeld || staat.bezig) return;
+    const ins = Instellingen.lees();
+    if (!Instellingen.volledig(ins)) {
+      if (staat.modus !== 'instellingen' && !staat.monitor) toonInstellingen();
+      return;
+    }
+    if (!m.magOphalen(ins, staat.geweigerd)) return;
+    staat.bezig = true;
+    let r;
+    try { r = await Ophalen.haal(ins); } finally { staat.bezig = false; }
+
+    const kopie = !!staat.monitor;               // vóór het antwoord verwerkt wordt
+    const { uitkomst, nieuw } = uitkomstVan(r, ins);
+    const vorig = { modus: staat.modus, regel: staat.regel };
+    const volgend = m.volgendScherm(uitkomst, { modus: staat.modus, kopie, zelf });
+    staat.regel = volgend.regel;
+
+    if (vorig.modus === 'instellingen' && volgend.modus === 'app') {
+      staat.melding = null; staat.test = null; staat.modus = 'app'; staat.eersteKeer = true; teken();
+    } else if (vorig.modus === 'instellingen') {
+      staat.melding = volgend.melding;
+      if (volgend.melding === null) staat.test = null;
+      werkInstellingenBij();
+    } else if (volgend.modus === 'instellingen') {
+      toonInstellingen(volgend.melding);
+    } else if (vorig.modus === 'laden' && volgend.modus === 'app') {
+      staat.modus = 'app'; staat.eersteKeer = true; teken();
+    } else if (volgend.modus === 'app' && (nieuw || vorig.regel !== volgend.regel)) {
+      teken({ stil: true });
+    }
+  }
+
+  async function testToken() {
+    const ins = Instellingen.lees();
+    if (!Instellingen.volledig(ins)) { staat.test = { soort: 'onvolledig' }; werkInstellingenBij(); return; }
+    const r = await Ophalen.haal(ins);
+    const { uitkomst, fout } = uitkomstVan(r, ins);
+    if (uitkomst === 'ok') { staat.regel = null; staat.melding = null; staat.test = { soort: 'ok' }; }
+    else if (uitkomst === 'kapot') staat.test = { soort: 'kapot', fout: `Het token werkt, maar ${fout.charAt(0).toLowerCase()}${fout.slice(1)}` };
+    else { staat.test = { soort: uitkomst, status: r.status }; if (uitkomst === 'token') staat.melding = null; }
+    if (staat.modus === 'instellingen') werkInstellingenBij();
+  }
+
+  // wist alleen tenor.kopie; de service worker bewaart geen gegevens
+  function wisKopie() {
+    Ophalen.wisKopie();
+    staat.monitor = null; staat.tekst = null; staat.opgehaald = null; staat.regel = null;
+    werkInstellingenBij();
+  }
+
+  /* ---- gebaren van de gebruiker ---- */
+
+  function klik(e) {
+    const el = e.target.closest('[data-tab],[data-ticker],[data-terug],[data-filter],[data-filter-weg],[data-open-instellingen],[data-sluit-instellingen],[data-actie],[data-thema-keuze]');
+    if (!el) return;
+    const ds = el.dataset;
+    if (ds.tab) {
+      staat.filter = null;
+      if (staat.modus === 'instellingen') { staat.melding = null; staat.modus = 'app'; staat.tab = ds.tab; teken(); vernieuw(); return; }
+      staat.tab = ds.tab; staat.detail = null; teken();
+    } else if (ds.terug !== undefined) {
+      staat.detail = null; teken({ beweging: 'van-detail' });
+    } else if (ds.filterWeg !== undefined) {
+      staat.filter = null; teken({ beweging: 'van-detail' });
+    } else if (ds.filter) {
+      staat.filter = ds.filter; staat.tab = 'grootboek'; staat.detail = null; teken({ beweging: 'naar-detail' });
+    } else if (ds.openInstellingen !== undefined) {
+      toonInstellingen();
+    } else if (ds.sluitInstellingen !== undefined) {
+      sluitInstellingen();
+    } else if (ds.actie === 'test') {
+      testToken();
+    } else if (ds.actie === 'wis') {
+      wisKopie();
+    } else if (ds.themaKeuze) {
+      Instellingen.bewaar({ thema: ds.themaKeuze });
+      Thema.zet(ds.themaKeuze);
+      document.querySelectorAll('[data-thema-keuze]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themaKeuze === ds.themaKeuze)));
+    } else if (ds.ticker) {
+      staat.detail = { ticker: ds.ticker, herkomst: ds.herkomst || staat.tab };
+      teken({ beweging: 'naar-detail' });
+    }
+  }
+
+  function invoer(e) {
+    const el = e.target.closest('[data-veld]');
+    if (!el) return;
+    Instellingen.bewaar({ [el.dataset.veld]: el.value.trim() });
+    if (staat.test || staat.melding) { staat.test = null; staat.melding = null; werkInstellingenBij(); }
+  }
+
+  // 2: niet bij elke toetsaanslag ophalen, wel als een veld de aandacht verliest
+  function veldLos(e) {
+    if (e.target.closest('[data-veld]') && staat.modus === 'instellingen') vernieuw({ zelf: true });
+  }
+
+  // 5.7: lange druk van 600 ms op het merk opent Instellingen
+  function langeDruk() {
+    let klok = null, start = null;
+    const stop = () => { clearTimeout(klok); klok = null; };
+    document.addEventListener('pointerdown', e => {
+      const merk = e.target.closest('[data-lange-druk]');
+      if (!merk) return;
+      start = { x: e.clientX, y: e.clientY };
+      klok = setTimeout(() => { klok = null; toonInstellingen(); }, 600);
+    });
+    document.addEventListener('pointermove', e => {
+      if (klok && start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) stop();
+    });
+    ['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, stop));
+    document.addEventListener('contextmenu', e => { if (e.target.closest('[data-lange-druk]')) e.preventDefault(); });
+  }
+
+  // 2: neerwaartse trek op een lijstscherm; het merk strijkt zich mee met de vinger en opnieuw bij loslaten
+  const DREMPEL = 64;
+  function trekOmTeVernieuwen() {
+    const scherm = document.getElementById('scherm');
+    let beginY = null, afstand = 0;
+    const merkDelen = () => document.querySelectorAll('#kop .merk-boven, #kop .merk-onder, #kop .s-noot');
+    const zetMerk = f => merkDelen().forEach(el => {
+      if (el.classList.contains('s-noot')) el.style.opacity = f >= 1 ? '1' : '0';
+      else el.style.transform = `scaleX(${f})`;
+    });
+    const herstel = () => merkDelen().forEach(el => { el.style.transform = ''; el.style.opacity = ''; });
+    const magTrekken = () => staat.modus === 'app' && !staat.detail;
+
+    scherm.addEventListener('touchstart', e => {
+      beginY = magTrekken() && scherm.scrollTop <= 0 ? e.touches[0].clientY : null;
+      afstand = 0;
+    }, { passive: true });
+    scherm.addEventListener('touchmove', e => {
+      if (beginY === null) return;
+      afstand = e.touches[0].clientY - beginY;
+      if (afstand <= 0 || scherm.scrollTop > 0) { herstel(); return; }
+      if (e.cancelable) e.preventDefault();
+      zetMerk(Math.min(afstand / DREMPEL, 1));
+    }, { passive: false });
+    const los = () => {
+      if (beginY === null) return;
+      beginY = null;
+      herstel();
+      if (afstand >= DREMPEL) {
+        const kop = document.getElementById('kop');
+        kop.classList.remove('opnieuw'); void kop.offsetWidth; kop.classList.add('opnieuw');
+        setTimeout(() => kop.classList.remove('opnieuw'), 1300);
+        vernieuw();
+      }
+    };
+    scherm.addEventListener('touchend', los);
+    scherm.addEventListener('touchcancel', los);
+  }
+
+  /* ---- opstart ---- */
+
+  let gekoppeld = false;
+  function koppel() {
+    if (gekoppeld) return;
+    gekoppeld = true;
+    const app = document.getElementById('app');
+    app.addEventListener('click', klik);
+    app.addEventListener('input', invoer);
+    app.addEventListener('change', veldLos);
+    langeDruk();
+    trekOmTeVernieuwen();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      Thema.pasToe();
+      if (staat.modus === 'app') teken({ stil: true });
+      vernieuw();
+    });
+    window.addEventListener('online', () => vernieuw());
+  }
+
+  function opstarten() {
+    const ins = Instellingen.lees();
+    Thema.zet(ins.thema);
+    koppel();
+    const kopie = Ophalen.leesKopie();
+    if (kopie) {
+      const gelezen = m.leesMonitor(kopie.tekst);
+      if (gelezen.ok) { staat.monitor = gelezen.data; staat.tekst = kopie.tekst; staat.opgehaald = kopie.opgehaald || null; }
+    }
+    if (!Instellingen.volledig(ins)) { staat.modus = 'instellingen'; teken(); return; }
+    staat.modus = staat.monitor ? 'app' : 'laden';
+    teken();
+    vernieuw();
+  }
+
+  // voorbeeldweergave: vaste gegevens, zonder ophalen
+  function start(monitor, opties = {}) {
+    staat.voorbeeld = true;
+    staat.monitor = m.leesMonitor(monitor).data;
+    if (opties.nu) staat.nu = () => new Date(opties.nu);
+    if (opties.tab) staat.tab = opties.tab;
+    Thema.zet(Instellingen.lees().thema);
+    koppel();
+    staat.modus = 'app';
+    teken();
+  }
+
+  return { opstarten, start, teken, staat };
+})();
+/* ==== einde schermen ==== */
+
+
+/* ==== thema ==== */
+const Thema = (() => {
+  'use strict';
+  let keuze = 'automatisch';
+  const STATUSBALK = { dag: '#F5F1E8', avond: '#131215', dagRust: '#EFE9DA', avondRust: '#0F0E11' };
+
+  // zet thema en rust op <html> en laat de statusbalk meekleuren
+  function pasToe(nu = new Date()) {
+    const root = document.documentElement;
+    const t = Model.thema(keuze, nu);
+    root.dataset.thema = t;
+    const rust = root.hasAttribute('data-rust');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', STATUSBALK[t + (rust ? 'Rust' : '')]);
+    return t;
+  }
+
+  function zet(nieuw) { keuze = nieuw; return pasToe(); }
+
+  function rust(aan) {
+    const root = document.documentElement;
+    if (aan) root.dataset.rust = ''; else delete root.dataset.rust;
+    pasToe();
+  }
+
+  setInterval(() => pasToe(), 60000);
+  return { pasToe, zet, rust };
+})();
+/* ==== einde thema ==== */
+
+</script>
+<script>
+/* ==== opstart ==== */
+Schermen.opstarten();
+// de service worker bewaart alleen de app zelf; op file:// of zonder https wordt hij niet geregistreerd
+if ('serviceWorker' in navigator && window.isSecureContext && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+</script>
+</body>
+</html>

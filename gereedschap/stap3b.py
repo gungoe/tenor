@@ -1,0 +1,127 @@
+"""Doorloop per reviewpunt: rendement onder 10%, verdwenen naam, dividend, balklengtes,
+   'pt' in Gold ink, 5xx, 404 met en zonder kopie, laadscherm na 8 s, time-out van 15 s.
+   Duurt ruim een minuut door de wachttijden. Gebruik: python3 gereedschap/stap3b.py"""
+import json
+from playwright.sync_api import sync_playwright
+from omgeving import kijkbestanden, url, FIXTURES, WERKMAP
+kijkbestanden()
+VB = (FIXTURES / 'voorbeeld.json').read_text()
+REST = (FIXTURES / 'rest.json').read_text()
+URL = 'https://api.github.com/repos/gunther/tenor-data/contents/monitor.json'
+fouten = []
+def ok(v, wat):
+    print(('  ✓ ' if v else '  ✗ ') + wat)
+    if not v: fouten.append(wat)
+ins = json.dumps({'repo': 'gunther/tenor-data', 'token': 'github_pat_x', 'thema': 'dag'})
+kopie = lambda tekst=VB: json.dumps({'tekst': tekst, 'opgehaald': '2026-09-10T18:30:00+02:00'})
+HDR = {'Access-Control-Allow-Origin': '*'}
+antwoord = lambda tekst, status=200: (lambda route: route.fulfill(status=status, body=tekst, headers=HDR))
+HANG = "window.fetch = (url, opt) => new Promise((_, nee) => opt.signal.addEventListener('abort', () => nee(new DOMException('afgebroken', 'AbortError'))));"
+
+with sync_playwright() as p:
+    b = p.chromium.launch()
+    def nieuw(opslag=None, route=None, init=None):
+        ctx = b.new_context(viewport={'width': 390, 'height': 844}, timezone_id='Europe/Brussels', has_touch=True)
+        if opslag: ctx.add_init_script(f"for (const [k, v] of Object.entries({json.dumps(opslag)})) localStorage.setItem(k, v);")
+        if init: ctx.add_init_script(init)
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fouten.append('paginafout: ' + str(e)))
+        if route: pg.route(URL, route)
+        pg.goto(url(WERKMAP / 'echt.html')); return ctx, pg
+    trek = lambda pg, afstand: pg.evaluate("""(afstand) => {
+      const el = document.getElementById('scherm'); const t = y => new Touch({ identifier: 1, target: el, clientX: 200, clientY: y });
+      el.dispatchEvent(new TouchEvent('touchstart', { touches: [t(200)], bubbles: true, cancelable: true }));
+      el.dispatchEvent(new TouchEvent('touchmove', { touches: [t(200 + afstand)], bubbles: true, cancelable: true }));
+      el.dispatchEvent(new TouchEvent('touchend', { touches: [], bubbles: true, cancelable: true })); }""", afstand)
+
+    print('1. geweigerd token zonder kopie')
+    ctx, pg = nieuw({'tenor.instellingen': ins}, antwoord('{}', 401)); pg.wait_for_timeout(500)
+    ok(pg.inner_text('.melding') == 'Het leestoken werkt niet.', 'tokenalarm')
+    ok(pg.locator('.terug').count() == 0 and pg.locator('#tabbalk').is_hidden(), 'geen terugpijl en geen tabbalk zonder kopie')
+    ctx.close()
+
+    print('2. Sinds instap onder 10%')
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie(REST)}, antwoord(REST)); pg.wait_for_timeout(400)
+    pg.click('[data-tab="portefeuille"]'); pg.click('[data-ticker="SIE.DE"]'); pg.wait_for_timeout(300)
+    w = pg.locator('.kolom-waarde').nth(1)
+    ok(w.inner_text() == '\u22120,6%' and 'goud' not in w.get_attribute('class'), 'SIE.DE −0,63% wordt "−0,6%" in Ink')
+    print('3. naam verdwijnt na vernieuwen')
+    zonder = json.loads(REST); zonder['posities'] = [x for x in zonder['posities'] if x['ticker'] != 'SIE.DE']
+    pg.unroute(URL); pg.route(URL, antwoord(json.dumps(zonder)))
+    pg.evaluate("document.dispatchEvent(new Event('visibilitychange'))"); pg.wait_for_timeout(500)
+    ok(pg.locator('.titel').inner_text() == 'Portefeuille' and pg.locator('#kop .merk').count() == 1, 'terug naar Portefeuille, geen leeg scherm')
+    print('13. aria-label')
+    ok(pg.get_attribute('[data-ticker="ENR.DE"]', 'aria-label') == 'Siemens Energy, +953,6% sinds instap, gewicht 14,5%', 'naam, rendement en gewicht')
+    print('11. DIVIDEND')
+    pg.click('[data-tab="grootboek"]')
+    tag = pg.locator('.tag-dividend').first
+    ok(tag.inner_text() == 'DIVIDEND' and tag.evaluate('e => getComputedStyle(e).color') == 'rgb(107, 105, 96)', 'dividend-tag in Mute')
+    print('12. Rest op Vandaag')
+    pg.click('[data-tab="vandaag"]')
+    ok('maandslot 2,1% onder het 10-maandsgemiddelde' in pg.inner_text('.scherm'), 'getal zonder teken')
+    print('9 en 10. held en balken')
+    pg.click('[data-tab="stand"]')
+    ok(pg.eval_on_selector('.held .eenheid', 'e => getComputedStyle(e).color') == 'rgb(125, 90, 18)', '"pt" in Gold ink')
+    breed = pg.evaluate("[...document.querySelectorAll('.balkrij')].map(r => (r.querySelector('.balk').offsetWidth / r.offsetWidth * 100).toFixed(1))")
+    ok(all(abs(float(a) - e) < 0.35 for a, e in zip(breed, [29, 58])), f'3,5 pt achter: Tenor 29%, Baseline 58% ({breed})')
+    ctx.close()
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie()}, antwoord(VB)); pg.wait_for_timeout(400)
+    breed = pg.evaluate("[...document.querySelectorAll('.balkrij')].map(r => (r.querySelector('.balk').offsetWidth / r.offsetWidth * 100).toFixed(1))")
+    ok(all(abs(float(a) - e) < 0.35 for a, e in zip(breed, [58, 55.6])), f'0,3 pt voor: 58% tegen 55,6% ({breed})')
+    ctx.close()
+
+    print('4. 5xx')
+    ctx, pg = nieuw({'tenor.instellingen': ins}, antwoord('{}', 503)); pg.wait_for_timeout(500)
+    ok(pg.locator('.laden').count() == 1, 'zonder kopie: laadscherm')
+    ctx.close()
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie()}, antwoord('{}', 502)); pg.wait_for_timeout(500)
+    ok(pg.locator('.held').count() == 1 and pg.inner_text('.kopie-regel') == 'niet bijgewerkt · kopie van do 10 sep 18:30', 'met kopie: kopie blijft, "niet bijgewerkt"')
+    ctx.close()
+
+    print('7. 404')
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie()}, antwoord('{}', 404)); pg.wait_for_timeout(500)
+    ok(pg.locator('.held').count() == 1 and pg.inner_text('.kopie-regel') == 'niet bijgewerkt · kopie van do 10 sep 18:30', 'met kopie: Stand blijft, "niet bijgewerkt"')
+    pg.evaluate("document.dispatchEvent(new Event('visibilitychange'))"); pg.wait_for_timeout(400)
+    ok(pg.locator('.held').count() == 1, 'terugkeer naar de voorgrond: nog steeds geen doorsturen')
+    print('   404 in Instellingen, met kopie')
+    box = pg.locator('#kop .merk').bounding_box(); pg.mouse.move(box['x'] + 10, box['y'] + 10); pg.mouse.down(); pg.wait_for_timeout(700); pg.mouse.up(); pg.wait_for_timeout(200)
+    pg.route('**/tenor-dat/contents/monitor.json', antwoord('{}', 404))
+    pg.fill('[data-veld="repo"]', 'gunther/tenor-dat'); pg.locator('[data-veld="repo"]').blur(); pg.wait_for_timeout(500)
+    ok(pg.inner_text('.titel') == 'Instellingen' and pg.inner_text('[data-vak="repo"]') == 'Niet gevonden — klopt de repo of het pad?', 'regel onder het repoveld, scherm wisselt niet')
+    print('   blur haalt op')
+    pg.route('**/tenor-data/contents/monitor.json', antwoord(REST))
+    pg.fill('[data-veld="repo"]', 'gunther/tenor-data'); pg.locator('[data-veld="repo"]').blur(); pg.wait_for_timeout(500)
+    ok(pg.inner_text('.titel') == 'Instellingen' and pg.locator('[data-vak="repo"]').inner_text() == '', 'geslaagd: regel weg, Instellingen blijft (er is een kopie)')
+    pg.click('[data-sluit-instellingen]'); pg.wait_for_timeout(300)
+    ok(pg.locator('.held').inner_text().startswith('\u22123,5') and pg.locator('.kopie-regel').count() == 0, 'nieuwe stand, geen regel onder Cadence')
+    ctx.close()
+    print('   404 zonder kopie')
+    ctx, pg = nieuw({'tenor.instellingen': ins}, antwoord('{}', 404)); pg.wait_for_timeout(500)
+    ok(pg.inner_text('.titel') == 'Instellingen' and pg.inner_text('[data-vak="repo"]') == 'Niet gevonden — klopt de repo of het pad?', 'Instellingen met de regel in Mute')
+    ok(pg.locator('.terug').count() == 0, 'geen terugpijl')
+    pg.unroute(URL); pg.route(URL, antwoord(VB))
+    pg.evaluate("document.dispatchEvent(new Event('visibilitychange'))"); pg.wait_for_timeout(600)
+    ok(pg.locator('.held').count() == 1, 'bij terugkeer naar de voorgrond opnieuw geprobeerd: de app opent vanzelf')
+    ctx.close()
+
+    print('8. laadscherm na 8 s')
+    ctx, pg = nieuw({'tenor.instellingen': ins}, init=HANG); pg.wait_for_timeout(1000)
+    ok(pg.locator('.laden-wacht').count() == 0, 'eerst geen wachtregel')
+    pg.wait_for_timeout(7600)
+    ok(pg.locator('.laden-wacht').inner_text() == 'Geen verbinding. Tenor wacht op het netwerk.', 'na 8 s de wachtregel')
+    print('5. time-out na 15 s')
+    pg.wait_for_timeout(6800)
+    ok(pg.locator('.laden').count() == 1, 'time-out zonder kopie: laadscherm blijft')
+    pg.evaluate("window.fetch = (url, opt) => Promise.resolve(new Response(%s, { status: 200 }))" % json.dumps(VB))
+    pg.evaluate("window.dispatchEvent(new Event('online'))"); pg.wait_for_timeout(500)
+    ok(pg.locator('.held').count() == 1 and pg.locator('.laden-wacht').count() == 0, 'bezig is losgelaten: online haalt op, wachtregel weg')
+    ctx.close()
+
+    print('5 en 6. hangende fetch met kopie, daarna trek op Stand')
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie()}, init=HANG); pg.wait_for_timeout(15600)
+    ok(pg.locator('.kopie-regel').count() == 1, 'time-out met kopie: offline-regel')
+    pg.evaluate("window.fetch = (url, opt) => Promise.resolve(new Response(%s, { status: 200 }))" % json.dumps(REST))
+    trek(pg, 80); pg.wait_for_timeout(500)
+    ok(pg.locator('.held').inner_text().startswith('\u22123,5') and pg.locator('.kopie-regel').count() == 0, 'trek op Stand vernieuwt na de time-out')
+    ctx.close()
+    b.close()
+print('\nfouten:', fouten or 'geen')
