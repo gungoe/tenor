@@ -22,9 +22,6 @@ test('balken: gelijke stand geeft twee even lange balken', () => {
   gelijk([b.tenor, b.baseline], [0.58, 0.58]);
   gelijk(m.standBalken({ portefeuille: 1, tracker: 1 }), null);
 });
-test('gewichtsbalk: 20% is volle breedte, begrensd', () => {
-  bijna(m.gewichtBalk(0.145), 0.725); gelijk(m.gewichtBalk(0.31), 1); gelijk(m.gewichtBalk(undefined), 0);
-});
 test('gewichtstags: afroombaar boven 8%, restje onder 1%', () => {
   gelijk(m.gewichtTag(0.0801), 'AFROOMBAAR'); gelijk(m.gewichtTag(0.08), null);
   gelijk(m.gewichtTag(0.0099), 'RESTJE'); gelijk(m.gewichtTag(0.033), null);

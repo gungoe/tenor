@@ -25,7 +25,7 @@ try:
         ctx = b.new_context(viewport={'width': 390, 'height': 844}, timezone_id='Europe/Brussels')
         ctx.add_init_script("""if (!sessionStorage.getItem('gezet')) { sessionStorage.setItem('gezet', '1');
           localStorage.setItem('tenor.instellingen', JSON.stringify({repo: 'gunther/tenor-data', token: 'github_pat_x', thema: 'dag'}));
-          localStorage.setItem('tenor.kopie', JSON.stringify({tekst: %s, opgehaald: '2026-09-10T18:30:00+02:00'})); }""" % json.dumps(VB))
+          localStorage.setItem('tenor.kopie', JSON.stringify({tekst: %s, opgehaald: '2026-09-24T18:30:00+02:00'})); }""" % json.dumps(VB))
         pg = ctx.new_page()
         pg.on('pageerror', lambda e: fouten.append(str(e)))
         api = []

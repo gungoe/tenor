@@ -48,19 +48,33 @@ Krijg je later een nieuwe `index.html` of `sw.js`, draai het script dan opnieuw.
 
 Geeft het script `CERTIFICATE_VERIFY_FAILED`, dan komt dat door de Python van python.org. Draai eenmalig `Install Certificates.command` in de map van die Python-versie in Programma's.
 
-## 3. Het leestoken
+## 3. De drie tokens
 
-GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token.
+Drie fijnmazige tokens, elk voor één taak. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token. Bij elk: Repository access → **Only select repositories**, en onder Repository permissions alleen **Contents**. Verder niets.
 
-- Repository access: **Only select repositories**, alleen **`tenor-data`**.
-- Permissions → Repository permissions → **Contents: Read-only**. Verder niets.
-- Werkt het token niet (verlopen of fout ingevuld), dan toont Tenor "Het leestoken werkt niet."
-- Heeft het token nog geen toegang tot `tenor-data`, of staat `monitor.json` er nog niet, dan antwoordt GitHub met 404. Tenor toont dan "Niet gevonden — klopt de repo of het pad?" en opent vanzelf zodra het lukt.
+| naam | repo | Contents | waar het staat |
+|---|---|---|---|
+| **tenor push** | `tenor` | Read and write | in de sleutelhanger van de Mac, om de app te pushen |
+| **tenor lezen** | `tenor-data` | Read-only | in de app, in Instellingen |
+| **tenor-data schrijven** | `tenor-data` | Read and write | in de sleutelhanger van de Mac, voor de avondrun |
+
+Twee tokens voor dezelfde host (`github.com`) houdt git alleen uit elkaar als het per repo onthoudt. Draai daarom één keer op de Mac:
+
+```
+git config --global credential.useHttpPath true
+```
+
+Daarna vraagt git bij de eerste push naar elke repo om een wachtwoord: plak daar het token dat bij die repo hoort. Een token komt nooit in een bestand, een commit of een commando.
+
+Over het leestoken in de app:
+
+- Werkt het niet (verlopen of fout ingevuld), dan toont Tenor "Het leestoken werkt niet."
+- Heeft het nog geen toegang tot `tenor-data`, of staat `monitor.json` er nog niet, dan antwoordt GitHub met 404. Tenor toont dan "Niet gevonden — klopt de repo of het pad?" en opent vanzelf zodra het lukt.
 
 ## 4. Op het beginscherm
 
-1. Open `https://<eigenaar>.github.io/tenor/` in Safari → Deel → **Zet op beginscherm**.
-2. Open Tenor vanaf het beginscherm. Zonder token opent Instellingen: vul `eigenaar/tenor-data` en het token in, tik **Token testen**, en daarna op de terugpijl.
+1. Open `https://gungoe.github.io/tenor/` in Safari → Deel → **Zet op beginscherm**.
+2. Open Tenor vanaf het beginscherm. Zonder token opent Instellingen: vul `gungoe/tenor-data` en het token "tenor lezen" in, tik **Token testen**, en daarna op de terugpijl.
 3. Instellingen later terugvinden: houd het merk linksboven 0,6 s ingedrukt.
 
 ## 5. Bij elke uitrol

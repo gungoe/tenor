@@ -16,7 +16,8 @@ const suiteNaam = n => { suite = n; };
 // objecten uit de vm-context hebben een ander prototype; vergelijk op inhoud
 const inhoud = v => (v !== null && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v);
 const gelijk = (a, b, uitleg) => assert.deepStrictEqual(inhoud(a), inhoud(b), uitleg);
-const voorbeeld = () => JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'voorbeeld.json'), 'utf8'));
+const fixture = naam => JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', `${naam}.json`), 'utf8'));
+const voorbeeld = () => fixture('voorbeeld');
 const S = '\u00a0', M = '\u2212';
 
 function draai() {
@@ -31,4 +32,4 @@ function draai() {
   process.exitCode = goed === gevallen.length ? 0 : 1;
 }
 
-module.exports = { suiteNaam, Model: context.Model, test, gelijk, voorbeeld, draai, S, M };
+module.exports = { suiteNaam, Model: context.Model, test, gelijk, voorbeeld, fixture, draai, S, M };

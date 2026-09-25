@@ -26,7 +26,7 @@ with sync_playwright() as p:
         if route: pg.route(URL, route)
         return ctx, pg
     ins = json.dumps({'repo': 'gunther/tenor-data', 'token': 'github_pat_x', 'thema': 'dag'})
-    kopie = json.dumps({'tekst': VB, 'opgehaald': '2026-09-10T18:30:00+02:00'})
+    kopie = json.dumps({'tekst': VB, 'opgehaald': '2026-09-24T18:30:00+02:00'})
     antwoord = lambda tekst, status=200: (lambda route: route.fulfill(status=status, body=tekst, headers={'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}))
     gezien = {}
     def teller(route):
@@ -45,7 +45,7 @@ with sync_playwright() as p:
     ok(pg.inner_text('.terug-label') == 'STAND', 'terugpijl verschijnt na geslaagde test')
     pg.click('[data-sluit-instellingen]'); pg.wait_for_timeout(400)
     ok(pg.locator('.held').count() == 1 and pg.locator('.titel').count() == 0, 'Stand zonder kop, met held')
-    ok('koersen van do 10 sep · 593 namen · volgende' in pg.inner_text('.scherm'), 'Cadence-sub met koersdatum')
+    ok('koersen van do 24 sep · 593 namen · volgende' in pg.inner_text('.scherm'), 'Cadence-sub met koersdatum')
     bewaard = json.loads(pg.evaluate("localStorage.getItem('tenor.instellingen')"))
     ok(bewaard['token'] == 'github_pat_x', 'instellingen bewaard onder tenor.instellingen')
     ok(pg.evaluate("!!localStorage.getItem('tenor.kopie')"), 'kopie bewaard')
@@ -75,7 +75,7 @@ with sync_playwright() as p:
     print('offline met kopie')
     ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': kopie}, lambda r: r.abort())
     pg.goto(url(WERKMAP / 'echt.html')); pg.wait_for_timeout(500)
-    ok(pg.inner_text('.kopie-regel') == 'offline · kopie van do 10 sep 18:30', 'offline-regel op Stand')
+    ok(pg.inner_text('.kopie-regel') == 'offline · kopie van do 24 sep 18:30', 'offline-regel op Stand')
     pg.click('[data-tab="vandaag"]'); ok(pg.locator('.kopie-regel').count() == 1, 'offline-regel op Vandaag')
     ctx.close()
 
@@ -121,7 +121,7 @@ with sync_playwright() as p:
     print('grootboek gefilterd')
     pg.click('[data-ticker="ENR.DE"]'); pg.wait_for_timeout(300)
     g = pg.locator('[data-grafiek]').bounding_box(); pg.mouse.move(g['x'] + g['width'] - 2, g['y'] + 30); pg.mouse.down()
-    ok(pg.inner_text('.aflezing').startswith('do 10 sep ·'), 'aflezing met datum uit handelsdagen: ' + pg.inner_text('.aflezing'))
+    ok(pg.inner_text('.aflezing').startswith('do 24 sep ·'), 'aflezing met datum uit handelsdagen: ' + pg.inner_text('.aflezing'))
     pg.mouse.up()
     ok('van 31-08' in pg.inner_text('.scherm'), 'rangorde uit rangorde_datum')
     pg.click('[data-filter="ENR.DE"]'); pg.wait_for_timeout(300)
@@ -132,12 +132,12 @@ with sync_playwright() as p:
 
     print('hartslag oud en fout, tandwiel zonder token')
     ctx, pg = nieuw(); pg.goto(url(WERKMAP / 'oud.html')); pg.wait_for_timeout(300)
-    ok(pg.inner_text('.zin') == 'De laatste run is vijf dagen oud. De cijfers hieronder zijn van do 10 sep 2026.', 'app-zin bij oude run')
+    ok(pg.inner_text('.zin') == 'De laatste run is vijf dagen oud. De cijfers hieronder zijn van do 24 sep 2026.', 'app-zin bij oude run')
     ok(pg.locator('.tandwiel').count() == 1, 'tandwiel op Stand zonder token')
     pg.click('.tandwiel'); ok(pg.inner_text('.titel') == 'Instellingen', 'tandwiel opent Instellingen')
     ctx.close()
     fout = json.loads(VB); fout['hartslag']['status'] = 'fout'; fout['hartslag']['run'] = 'Yahoo gaf geen koersen; de run stopte.'
-    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': json.dumps({'tekst': json.dumps(fout), 'opgehaald': '2026-09-10T18:30:00+02:00'})}, lambda r: r.abort())
+    ctx, pg = nieuw({'tenor.instellingen': ins, 'tenor.kopie': json.dumps({'tekst': json.dumps(fout), 'opgehaald': '2026-09-24T18:30:00+02:00'})}, lambda r: r.abort())
     pg.goto(url(WERKMAP / 'echt.html')); pg.wait_for_timeout(400)
     ok(pg.inner_text('.cadence') == 'CADENCE · FOUT' and pg.inner_text('.zin-extra.alarm') == 'Yahoo gaf geen koersen; de run stopte.', 'fout: label en runtekst onder de zin')
     ctx.close()

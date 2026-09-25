@@ -1,4 +1,4 @@
-const { Model: m, test, gelijk, voorbeeld } = require('./omgeving');
+const { Model: m, test, gelijk, voorbeeld, fixture } = require('./omgeving');
 
 test('voorbeeld (test/fixtures/voorbeeld.json) leest volledig in', () => {
   const r = m.leesMonitor(JSON.stringify(voorbeeld()));
@@ -7,7 +7,7 @@ test('voorbeeld (test/fixtures/voorbeeld.json) leest volledig in', () => {
   gelijk(r.data.posities[0].reeks.length, 200);
   gelijk(r.data.posities[0].sma_reeks.length, 200);
   gelijk(r.data.handelsdagen.length, 200);
-  gelijk(r.data.handelsdagen[199], '2026-09-10');
+  gelijk(r.data.handelsdagen[199], '2026-09-24');
   gelijk(Object.keys(r.data).sort(), ['beslisregel', 'grootboek', 'handelsdagen', 'hartslag', 'kosten', 'marktfilter', 'posities', 'rangorde_datum', 'stand', 'vandaag']);
 });
 test('voorbeeld is intern consistent: gewichten tellen op tot ± 100% min cash', () => {
@@ -52,4 +52,27 @@ test('dag van een koerspunt komt uit handelsdagen op dezelfde index', () => {
   gelijk(m.dagVanPunt(dagen, 0, 3), '2026-09-08');
   gelijk(m.dagVanPunt(undefined, 0, 3), null);
   gelijk(m.datum(m.dagVanPunt(dagen, 0, 3), 'wdm'), 'di 8 sep');
+});
+test('voorbeeld begint bij de herstart op 22 september 2026, zonder eerdere historiek', () => {
+  const d = voorbeeld();
+  gelijk([d.stand.start.datum, d.stand.sinds_start[0][0], d.beslisregel.startdatum], ['2026-09-22', '2026-09-22', '2026-09-22']);
+  gelijk(d.posities.every(p => p.instap >= '2026-09-22'), true);
+  gelijk(d.grootboek.every(r => r.datum >= '2026-09-22'), true);
+});
+test('fixtures dragen elke nieuwe toestand', () => {
+  const vb = voorbeeld(), rest = fixture('rest');
+  const tracker = vb.grootboek.find(r => r.kant === 'TRACKER');
+  gelijk(Number.isInteger(tracker.aantal), false, 'tracker met breukdeel');
+  const div = vb.grootboek.find(r => r.kant === 'DIVIDEND');
+  gelijk(Math.round((div.bruto - div.inhouding) * 100) / 100, div.bedrag, 'dividend: bedrag = bruto − inhouding');
+  gelijk(vb.posities.find(p => p.ticker === div.ticker).dividend_eur, div.bedrag, 'dividend_eur is de som van het netto');
+  gelijk(vb.posities.every(p => typeof p.dividend_eur === 'number'), true, 'dividend_eur 0 is informatie, niet afwezig');
+  gelijk(vb.posities.every(p => p.beschrijving && p.beschrijving.length <= 90 && !/\d/.test(p.beschrijving)), true, 'beschrijving');
+  gelijk(vb.posities.some(p => /^(Industrials|Financials|Energy|Utilities|Health Care)$/.test(p.sector)), false, 'sectoren in het Nederlands');
+  gelijk(vb.posities.some(p => String(p.koers_vs_sma200).split('.')[1].length === 5), true, 'koers_vs_sma200 met vijf decimalen');
+  gelijk(vb.posities.every(p => typeof p.afstand_sma200 === 'number'), true, 'afstand_sma200 staat er nog');
+  gelijk(rest.posities.some(p => p.in_top60 === false), true, 'positie buiten de top-60');
+  gelijk(rest.vandaag.open_plaatsen > 0, true, 'open plaatsen');
+  gelijk(rest.grootboek.some(r => r.kant === 'DIVIDEND' && r.bruto === undefined), true, 'dividend zonder bruto');
+  gelijk(rest.posities.some(p => p.beschrijving === undefined), true, 'positie zonder beschrijving');
 });

@@ -1,6 +1,6 @@
-"""Uitrol achter de HTTP-cache van GitHub Pages (max-age=600): installeert versie 0.4.0,
-   verhoogt daarna VERSIE in index.html en sw.js, en opent drie keer.
-   'nieuw' hoort 0.4.0 -> 0.4.1 -> 0.4.1 te geven, 'oud' (zonder de twee cacheregels) blijft hangen.
+"""Uitrol achter de HTTP-cache van GitHub Pages (max-age=600): installeert de huidige versie,
+   verhoogt daarna VERSIE in index.html en sw.js naar 9.9.9, en opent drie keer.
+   'nieuw' hoort 0.5.0 -> 9.9.9 -> 9.9.9 te geven, 'oud' (zonder de twee cacheregels) blijft hangen.
    Gebruik: python3 gereedschap/uitrol.py nieuw 8802"""
 import sys, time, pathlib, shutil, subprocess
 from playwright.sync_api import sync_playwright

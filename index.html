@@ -194,20 +194,16 @@ html[data-thema="avond"] .vast {
 .rij.cash { justify-content: space-between; }
 
 /* ---- Portefeuille ---- */
-.legende-rij { display: flex; justify-content: space-between; gap: 10px; padding: 12px var(--marge) 8px; border-bottom: 1px solid var(--lijn); margin: 0; }
-.blokje { display: inline-block; width: 8px; height: 8px; margin-right: 6px; vertical-align: 0; }
-.blokje.goud { background: var(--goud); }
-.blokje.grafiet { background: var(--grafiet); }
-.positie { display: block; padding: 11px 0 12px; }
-.positie:first-child { border-top: 0; }
+.sorteerregel { padding: 4px var(--marge) 0; }
+.rijen.portefeuille > :first-child { border-top: 0; }
+.positie { display: block; padding: 11px 0; }
+.rangnummer { flex: none; width: 24px; text-align: right; font: 400 13px/1.3 var(--mono); color: var(--mute); }
+.grenslijn { display: flex; align-items: center; min-height: 44px; padding: 11px 0; border-top: 1px solid var(--lijn); }
 .positie-lijn { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .ticker { font: 400 14px/1.3 var(--mono); flex: none; }
 .naam { font: 400 13px/1.3 var(--sans); color: var(--mute); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rendement, .gewicht { font: 400 13px/1.3 var(--mono); white-space: nowrap; flex: none; }
 .gewicht { min-width: 44px; text-align: right; }
-.gewichtspoor { height: 4px; background: var(--grond-2); margin-top: 8px; border-radius: 2px; overflow: hidden; }
-.gewichtspoor span { display: block; height: 100%; background: var(--grafiet); border-radius: 2px; }
-.gewichtspoor span.boven { background: var(--goud); }
 
 /* ---- Vandaag ---- */
 .sectie { padding: 20px var(--marge) 0; }
@@ -235,9 +231,13 @@ html[data-thema="avond"] .vast {
 .kolom-waarde { font: 500 30px/1.15 var(--serif); letter-spacing: -.01em; margin-top: 6px; white-space: nowrap; }
 .kolom-waarde.goud { color: var(--goud); }
 .kolom-sub { font: 400 12.5px/1.35 var(--sans); color: var(--mute); margin-top: 4px; }
-.balkgrid { display: grid; grid-template-columns: 1fr auto; column-gap: 14px; align-items: center; padding: 18px var(--marge) 4px; row-gap: 6px; }
-.balkgrid .spoor { position: relative; height: 22px; }
-.balkgrid .balkwaarde { margin: 0; text-align: right; }
+.beschrijving {
+  font: 400 13px/1.4 var(--sans); color: var(--sub); margin-top: 6px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.instapstreep { stroke: var(--lijn); stroke-width: 1; }
+.as-onder { position: relative; }
+.instap-label { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
 .sma-label { font: 400 10.5px var(--mono); letter-spacing: .14em; fill: var(--mute); }
 
 /* ---- tabbalk ---- */
@@ -318,7 +318,7 @@ html[data-rust] .rustteken { animation: adem 2.4s ease-in-out infinite; }
 const Instellingen = (() => {
   'use strict';
   const SLEUTEL = 'tenor.instellingen';
-  const STANDAARD = { repo: '', token: '', thema: 'automatisch' };
+  const STANDAARD = { repo: '', token: '', thema: 'automatisch', sortering: 'gewicht' };
 
   // localStorage kan ontbreken of leeg terugkomen; de app werkt dan met de standaard
   function lees() {
@@ -327,7 +327,8 @@ const Instellingen = (() => {
       return {
         repo: typeof ruw.repo === 'string' ? ruw.repo : STANDAARD.repo,
         token: typeof ruw.token === 'string' ? ruw.token : STANDAARD.token,
-        thema: ['automatisch', 'dag', 'avond'].includes(ruw.thema) ? ruw.thema : STANDAARD.thema
+        thema: ['automatisch', 'dag', 'avond'].includes(ruw.thema) ? ruw.thema : STANDAARD.thema,
+        sortering: ['gewicht', 'instap', 'rang'].includes(ruw.sortering) ? ruw.sortering : STANDAARD.sortering
       };
     } catch (e) { return { ...STANDAARD }; }
   }
@@ -402,15 +403,35 @@ const Model = (() => {
   const MIN = '\u2212';          // typografisch min-teken
   const HARDE_SPATIE = '\u00a0'; // "€ 101.240" breekt nooit af
 
+  const isGetal = v => typeof v === 'number' && isFinite(v);
+
   /* ---- formattering ---- */
 
-  function getal(n, decimalen = 0) {
-    if (typeof n !== 'number' || !isFinite(n)) return '';
-    const factor = 10 ** decimalen;
-    const afgerond = Math.round(Math.abs(n) * factor + 1e-9) / factor;
-    const [geheel, deel] = afgerond.toFixed(decimalen).split('.');
+  // rondt |n| af op 'decimalen' plaatsen, half van nul af, op het getal zoals het decimaal geschreven staat;
+  // 'schuif' verplaatst eerst de komma (2 = procent), zodat 0,0215 "2,2" wordt en nooit "2,1" door 2,1499999…
+  function decimaal(n, decimalen, schuif = 0) {
+    const [mantisse, macht] = Math.abs(n).toExponential().split('e');
+    const cijfers = mantisse.replace('.', '');
+    const lengte = Number(macht) + schuif + 1;               // aantal cijfers vóór de komma
+    const geheel = lengte > 0 ? cijfers.slice(0, lengte).padEnd(lengte, '0') : '0';
+    const breuk = lengte > 0 ? cijfers.slice(lengte) : '0'.repeat(-lengte) + cijfers;
+    let som = BigInt(geheel + breuk.slice(0, decimalen).padEnd(decimalen, '0'));
+    if ((breuk.charAt(decimalen) || '0') >= '5') som += 1n;
+    const tekst = som.toString().padStart(decimalen + 1, '0');
+    return { geheel: tekst.slice(0, tekst.length - decimalen), deel: tekst.slice(tekst.length - decimalen) };
+  }
+
+  function getal(n, decimalen = 0, schuif = 0) {
+    if (!isGetal(n)) return '';
+    const { geheel, deel } = decimaal(n, decimalen, schuif);
     const tekst = geheel.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (deel ? ',' + deel : '');
-    return (n < 0 && afgerond !== 0 ? MIN : '') + tekst;
+    return (n < 0 && /[1-9]/.test(geheel + deel) ? MIN : '') + tekst;
+  }
+
+  // stuks: heel zonder komma, een breukdeel met hoogstens vier decimalen zonder nullen achteraan
+  function aantal(n) {
+    if (!isGetal(n)) return '';
+    return getal(n, 4).replace(/,?0+$/, '');
   }
 
   function euro(n, decimalen = 0) {
@@ -422,16 +443,27 @@ const Model = (() => {
 
   // f is een fractie (0,012 = 1,2%)
   function pct(f, decimalen = 1, teken = false) {
-    if (typeof f !== 'number' || !isFinite(f)) return '';
-    const tekst = getal(f * 100, decimalen);
+    if (!isGetal(f)) return '';
+    const tekst = getal(f, decimalen, 2);
     const positief = f > 0 && tekst.replace(/[^1-9]/g, '') !== '';
     return (teken && positief ? '+' : '') + tekst + '%';
   }
 
   // procentpunten uit een fractie; de eenheid "pt" zet het scherm er zelf naast
   function pt(f, decimalen = 1) {
-    if (typeof f !== 'number' || !isFinite(f)) return '';
-    return getal(f * 100, decimalen);
+    if (!isGetal(f)) return '';
+    return getal(f, decimalen, 2);
+  }
+
+  // onder 10% één decimaal, vanaf 10% geen (Detail: rendement en de woorden bij de SMA-lijn)
+  const procentDecimalen = f => (Number(decimaal(f, 1, 2).geheel) >= 10 ? 0 : 1);
+
+  // 5.6: de ligging van de koers ten opzichte van de SMA200, in woorden en zonder teken
+  function smaLabel(f) {
+    if (!isGetal(f)) return '';
+    const tekst = pct(Math.abs(f), procentDecimalen(f));
+    if (!/[1-9]/.test(tekst)) return 'KOERS GELIJK AAN SMA200';
+    return `KOERS ${tekst} ${f > 0 ? 'BOVEN' : 'ONDER'} SMA200`;
   }
 
   const DAG_KORT = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
@@ -479,7 +511,7 @@ const Model = (() => {
 
   const hoofdletter = t => (t.startsWith('één') ? 'Eén' + t.slice(3) : t.charAt(0).toUpperCase() + t.slice(1));
 
-  const stuks = n => (typeof n === 'number' && isFinite(n) ? `${getal(n)}${HARDE_SPATIE}st` : '');
+  const stuks = n => (isGetal(n) ? `${aantal(n)}${HARDE_SPATIE}st` : '');
   const dagenTekst = n => (n === 1 ? '1 dag' : `${getal(n)} dagen`);
 
   // lege sectie op Vandaag: één zin in Sub (5.3)
@@ -632,8 +664,6 @@ const Model = (() => {
 
   /* ---- afgeleiden ---- */
 
-  const isGetal = v => typeof v === 'number' && isFinite(v);
-
   function standVerschil(stand) {
     if (!stand || !stand.start) return null;
     const { portefeuille: p, tracker: t } = stand, k = stand.start.kapitaal;
@@ -653,9 +683,8 @@ const Model = (() => {
     return p >= t ? { tenor: LANGSTE_BALK, baseline: kort } : { tenor: kort, baseline: LANGSTE_BALK };
   }
 
-  const GEWICHT_VOL = 0.20, AFROOM_GRENS = 0.08, RESTJE_GRENS = 0.01;
+  const AFROOM_GRENS = 0.08, RESTJE_GRENS = 0.01;
 
-  const gewichtBalk = g => (isGetal(g) ? Math.min(Math.max(g / GEWICHT_VOL, 0), 1) : 0);
   const bovenAfroomgrens = g => isGetal(g) && g > AFROOM_GRENS;
 
   function gewichtTag(g) {
@@ -667,14 +696,15 @@ const Model = (() => {
 
   function rendementWeergave(f, { detail = false } = {}) {
     if (!isGetal(f)) return null;
-    const opEen = Math.round(Math.abs(f) * 1000) / 10;
-    const tekst = pct(f, detail && opEen >= 10 ? 0 : 1, true);
+    const tekst = pct(f, detail ? procentDecimalen(f) : 1, true);
     return { tekst, positief: tekst.charAt(0) === '+' };
   }
 
-  function positieLabel(p) {
+  // bij sortering RANG komt de rang erbij: "RELX, rang 40, +2,8% sinds instap, gewicht 3,5%"
+  function positieLabel(p, { rang = false } = {}) {
     const r = rendementWeergave(p.rendement);
-    return [p.naam || p.ticker, r ? `${r.tekst} sinds instap` : '', isGetal(p.gewicht) ? `gewicht ${pct(p.gewicht, 1)}` : '']
+    return [p.naam || p.ticker, rang && isGetal(p.rang) ? `rang ${getal(p.rang)}` : '',
+      r ? `${r.tekst} sinds instap` : '', isGetal(p.gewicht) ? `gewicht ${pct(p.gewicht, 1)}` : '']
       .filter(Boolean).join(', ');
   }
 
@@ -696,13 +726,132 @@ const Model = (() => {
     return f > 0 ? 1 : -1;
   }
 
-  function portefeuilleLijst(posities) {
-    return (posities || []).map((p, i) => [p, i])
-      .sort(([a, i], [b, j]) => {
-        const ga = isGetal(a.gewicht) ? a.gewicht : -Infinity;
-        const gb = isGetal(b.gewicht) ? b.gewicht : -Infinity;
-        return gb - ga || i - j;
-      }).map(([p]) => p);
+  /* ---- Portefeuille (5.2) ---- */
+
+  // sleutel → [label, veld, hoogste eerst]
+  const SORTERING = {
+    gewicht: ['Gewicht', 'gewicht', true],
+    instap: ['Sinds instap', 'rendement', true],
+    rang: ['Rang', 'rang', false]
+  };
+  const SORTERING_STANDAARD = 'gewicht';
+
+  // de labels van de sorteerregel; een label verdwijnt als het veld bij alle posities ontbreekt
+  function sorteringen(posities) {
+    return Object.keys(SORTERING).filter(k => (posities || []).some(p => isGetal(p[SORTERING[k][1]])));
+  }
+
+  const sorteerLabel = k => (SORTERING[k] ? SORTERING[k][0] : '');
+
+  // de bewaarde keuze, of de standaard als dat label er niet (meer) is
+  function actieveSortering(keuze, posities) {
+    const er = sorteringen(posities);
+    if (er.includes(keuze)) return keuze;
+    return er.includes(SORTERING_STANDAARD) ? SORTERING_STANDAARD : er[0] || null;
+  }
+
+  const opTicker = (a, b) => {
+    const x = String(a.ticker || ''), y = String(b.ticker || '');
+    return x < y ? -1 : x > y ? 1 : 0;
+  };
+
+  // gelijke waarden op ticker; een positie zonder waarde onderaan, ook op ticker
+  function portefeuilleLijst(posities, sortering = SORTERING_STANDAARD) {
+    const [, veld, hoogsteEerst] = SORTERING[sortering] || [];
+    return [...(posities || [])].sort((a, b) => {
+      if (!veld) return opTicker(a, b);
+      const va = a[veld], vb = b[veld];
+      if (!isGetal(va) || !isGetal(vb)) return (isGetal(va) ? -1 : isGetal(vb) ? 1 : 0) || opTicker(a, b);
+      return (hoogsteEerst ? vb - va : va - vb) || opTicker(a, b);
+    });
+  }
+
+  const TOP60_BUITEN = 'buiten de top-60 · SMA200 beslist';
+
+  // index van de eerste positie buiten de top-60 in de lijst: daar komt de grenslijn vóór (alleen bij RANG); anders -1
+  function grensIndex(lijst, sortering) {
+    if (sortering !== 'rang') return -1;
+    return (lijst || []).findIndex(p => p.in_top60 === false);
+  }
+
+  function cashLabel(open) {
+    if (!isGetal(open) || open <= 0) return 'CASH';
+    return `CASH · ${getal(open)} ${open === 1 ? 'PLAATS' : 'PLAATSEN'} OPEN`;
+  }
+
+  // de rijen van Portefeuille in volgorde: posities, bij RANG de grenslijn, en in elke sortering als laatste de cash
+  // geeft [{ soort: 'positie', positie } | { soort: 'grens' } | { soort: 'cash', label, bedrag }]
+  function portefeuilleRijen(monitor, sortering) {
+    const d = monitor || {};
+    const lijst = portefeuilleLijst(d.posities, sortering);
+    const grens = grensIndex(lijst, sortering);
+    const rijen = [];
+    lijst.forEach((positie, i) => {
+      if (i === grens) rijen.push({ soort: 'grens' });
+      rijen.push({ soort: 'positie', positie });
+    });
+    const vd = d.vandaag || {};
+    if (isGetal(vd.cash)) rijen.push({ soort: 'cash', label: cashLabel(vd.open_plaatsen), bedrag: vd.cash });
+    return rijen;
+  }
+
+  /* ---- Vandaag (5.3) ---- */
+
+  // de rustige dag: niets verkocht, gekocht of afgeroomd, geen open plaats, en kopen mag
+  function rustigeDag(monitor) {
+    const vd = (monitor && monitor.vandaag) || {};
+    const leeg = k => !Array.isArray(vd[k]) || vd[k].length === 0;
+    const open = vd.open_plaatsen;
+    return leeg('verkopen') && leeg('kopen') && leeg('afromingen') &&
+      (!isGetal(open) || open === 0) && rust(monitor) === false;
+  }
+
+  /* ---- Detail (5.6) ---- */
+
+  // index van de instapdag in een reeks van n punten die eindigt op de laatste handelsdag; null als instap buiten de reeks valt
+  function instapIndex(handelsdagen, instap, n) {
+    if (!Array.isArray(handelsdagen) || !leesDatum(instap) || !isGetal(n) || n < 1) return null;
+    const dagen = handelsdagen.filter(Boolean);
+    if (!dagen.length || instap < dagen[0] || instap > dagen[dagen.length - 1]) return null;
+    const i = handelsdagen.findIndex(d => d && d >= instap) - (handelsdagen.length - n);
+    return i >= 0 && i < n ? i : null;
+  }
+
+  // het label "instap" onder de as vervalt binnen 40 px van "200 dagen geleden" of "nu" (mono 11 px: 6,6 px per teken)
+  const TEKEN_MONO_11 = 6.6, LABEL_AFSTAND = 40;
+  function instapLabelPast(x, breedte) {
+    const half = 'instap'.length * TEKEN_MONO_11 / 2;
+    const links = '200 dagen geleden'.length * TEKEN_MONO_11;
+    const rechts = breedte - 'nu'.length * TEKEN_MONO_11;
+    return x - half - links >= LABEL_AFSTAND && rechts - (x + half) >= LABEL_AFSTAND;
+  }
+
+  // "€ 94 winst", en bij verlies "€ 1.240 verlies", nooit "−€ 1.240 winst"
+  function winstTekst(w) {
+    if (!isGetal(w)) return '';
+    return w < 0 && euro(w).startsWith(MIN) ? `${euro(-w)} verlies` : `${euro(Math.abs(w))} winst`;
+  }
+
+  // de rij Rangorde: rechts "rang 40 · score 57", sub "van 31-08 · blijft in de top-60"
+  function rangordeRechts(p) {
+    return [isGetal(p.rang) ? `rang ${getal(p.rang)}` : '', isGetal(p.score) ? `score ${getal(p.score)}` : ''].filter(Boolean).join(' · ');
+  }
+
+  function rangordeSub(p, peil) {
+    const top = typeof p.in_top60 === 'boolean' ? (p.in_top60 ? 'blijft in de top-60' : TOP60_BUITEN) : '';
+    return [leesDatum(peil) ? `van ${datum(peil, 'dagmaand')}` : '', top].filter(Boolean).join(' · ');
+  }
+
+  const toonDividend = p =>!!p && isGetal(p.dividend_eur) && p.dividend_eur > 0;
+
+  // sub van de rij Dividend: de DIVIDEND-regels van deze naam sinds instap
+  function dividendRegel(rijen, ticker, instap) {
+    const data = (rijen || [])
+      .filter(r => r.kant === 'DIVIDEND' && r.ticker === ticker && leesDatum(r.datum) && (!instap || r.datum >= instap))
+      .map(r => r.datum).sort();
+    if (!data.length) return 'netto';
+    const laatst = datum(data[data.length - 1], 'dagmaand');
+    return data.length === 1 ? `netto · geboekt op ex-datum ${laatst}` : `netto · ${data.length} keer, laatst op ex-datum ${laatst}`;
   }
 
   function voortgang(beslisregel) {
@@ -714,6 +863,27 @@ const Model = (() => {
     const b = isGetal(rij.beurstaks) ? rij.beurstaks : 0;
     const s = isGetal(rij.spread) ? rij.spread : 0;
     return isGetal(rij.beurstaks) || isGetal(rij.spread) ? b + s : null;
+  }
+
+  // de twee regels rechts in een grootboekrij (5.5): { boven, onder, breuk }
+  // heel aantal: "69 × 64,12 = € 4.424" met "kosten € 6" eronder
+  // breukdeel: "€ 100.395" met "1.565,7439 × 64,12 · kosten € 48" eronder
+  // dividend: het netto bedrag met "bruto € 17,71 · ingehouden € 5,31" eronder, of "netto · op ex-datum"
+  function grootboekRegels(rij) {
+    const kosten = rijKosten(rij);
+    const kostenTekst = kosten != null ? `kosten ${euro(kosten)}` : '';
+    if (rij.kant === 'DIVIDEND') {
+      const onder = isGetal(rij.bruto) && isGetal(rij.inhouding)
+        ? `bruto ${euro(rij.bruto, 2)} · ingehouden ${euro(rij.inhouding, 2)}` : 'netto · op ex-datum';
+      return { boven: euro(rij.bedrag, 2), onder, breuk: false };
+    }
+    const stuk = aantal(rij.aantal);
+    const som = stuk && isGetal(rij.koers) ? `${stuk} × ${getal(rij.koers, 2)}` : '';
+    const bedrag = euro(rij.bedrag);
+    if (stuk.includes(',')) {
+      return { boven: bedrag || som, onder: [bedrag ? som : '', kostenTekst].filter(Boolean).join(' · '), breuk: true };
+    }
+    return { boven: [som, bedrag].filter(Boolean).join(' = '), onder: kostenTekst, breuk: false };
   }
 
   function grootboekPerDag(rijen, ticker = null) {
@@ -817,10 +987,13 @@ const Model = (() => {
     },
     beslisregel: { startdatum: 'datum', oordeeldatum: 'datum', marge_pp: 'getal', dag: 'getal', van: 'getal', oordeel: 'tekst' },
     marktfilter: { aan: 'bool', afstand: 'getal', maanden_onder: 'getal', bevestiging: 'getal', laatste_maandeinde: 'datum', tekst: 'tekst' },
+    // afstand_sma200 blijft gelezen maar wordt nooit gebruikt: keur_monitor.js in Trading Screener keurt monitor.json
+    // met dit schema en meldt elk veld dat wegvalt als fout, en de Mac schrijft het nog
     posities: [{
-      ticker: 'tekst', naam: 'tekst', sector: 'tekst', sector_n: 'getal', sector_max: 'getal', aantal: 'getal',
+      ticker: 'tekst', naam: 'tekst', beschrijving: 'tekst', sector: 'tekst', sector_n: 'getal', sector_max: 'getal', aantal: 'getal',
       koers: 'getal', dagkoers_verandering: 'getal', instap: 'datum', koers_in: 'getal', rendement: 'getal',
-      winst_eur: 'getal', gewicht: 'getal', gewicht_bij_aankoop: 'getal', sma200: 'getal', afstand_sma200: 'getal',
+      winst_eur: 'getal', dividend_eur: 'getal', gewicht: 'getal', gewicht_bij_aankoop: 'getal', sma200: 'getal',
+      koers_vs_sma200: 'getal', afstand_sma200: 'getal',
       rang: 'getal', score: 'getal', in_top60: 'bool', dagen: 'getal', reeks: 'getallen', sma_reeks: 'getallen'
     }],
     vandaag: {
@@ -829,7 +1002,7 @@ const Model = (() => {
     },
     grootboek: [{
       datum: 'datum', ticker: 'tekst', kant: 'kant', aantal: 'getal', koers: 'getal', bedrag: 'getal',
-      beurstaks: 'getal', spread: 'getal', reden: 'tekst'
+      beurstaks: 'getal', spread: 'getal', reden: 'tekst', bruto: 'getal', inhouding: 'getal'
     }],
     kosten: { beurstaks: 'getal', spread: 'getal', omzet: 'getal' },
     handelsdagen: 'datums',
@@ -863,13 +1036,15 @@ const Model = (() => {
   }
 
   return {
-    getal, euro, pct, pt, datum, tijd, stuks, dagenTekst, inWoorden, hoofdletter, leesDatum, leesTijd,
+    getal, aantal, euro, pct, pt, smaLabel, datum, tijd, stuks, dagenTekst, inWoorden, hoofdletter, leesDatum, leesTijd,
     legeZin, kopieRegel, ophaalSoort, monitorUrl, volgendScherm, magOphalen,
     rendementWeergave, positieLabel, maandslotTekst, detailGeldig,
     handelsdagenTussen, relatieveDag, volgendeRun,
     hartslag, cadenceLabel, oudZin, rust, thema, toestanden,
-    standVerschil, standBalken, gewichtBalk, bovenAfroomgrens, gewichtTag, teken,
-    portefeuilleLijst, voortgang, rijKosten, grootboekPerDag, transactiesVoorNaam,
+    standVerschil, standBalken, bovenAfroomgrens, gewichtTag, teken,
+    sorteringen, sorteerLabel, actieveSortering, portefeuilleLijst, grensIndex, TOP60_BUITEN, cashLabel, portefeuilleRijen,
+    rustigeDag, instapIndex, instapLabelPast, winstTekst, rangordeRechts, rangordeSub, toonDividend, dividendRegel,
+    voortgang, rijKosten, grootboekRegels, grootboekPerDag, transactiesVoorNaam,
     dagVanPunt, raster, schaal, pad, leesMonitor
   };
 })();
@@ -976,7 +1151,7 @@ const Schermen = (() => {
 
   function restRechts(rust, kort) {
     if (rust === true) return `<span class="met-teken goud-tekst">${rusttekenSvg(16)}${kort ? 'actief' : 'actief · niets kopen'}</span>`;
-    return `<span class="goud-tekst">${kort ? 'geen' : 'geen · er wordt gekocht'}</span>`;
+    return `<span class="goud-tekst">${kort ? 'geen' : 'geen · kopen mag'}</span>`;
   }
 
   /* ---- grafiek ---- */
@@ -984,7 +1159,7 @@ const Schermen = (() => {
   const grafieken = new Map();
   let grafiekTeller = 0;
 
-  function grafiekHtml({ reeksen, noot, maat, label, aflezing, onder, extraSvg = () => '' }) {
+  function grafiekHtml({ reeksen, noot, maat, label, aflezing, onder, extraSvg = () => '', onderExtra = () => '' }) {
     const alle = reeksen.flatMap(r => r.waarden);
     const r = m.raster(alle);
     if (!r) return '';
@@ -1018,7 +1193,7 @@ const Schermen = (() => {
           <line class="peil" id="${id}-peil" x1="0" x2="0" y1="0" y2="${maat.hoogte}" visibility="hidden"/>
         </svg>
       </div>
-      <div class="as-onder"><span>${h(onder[0])}</span><span>${h(onder[1])}</span></div>`;
+      <div class="as-onder"><span>${h(onder[0])}</span><span>${h(onder[1])}</span>${onderExtra(sch, maat)}</div>`;
   }
 
   function koppelGrafieken(wortel) {
@@ -1132,31 +1307,36 @@ const Schermen = (() => {
 
   function scherm_portefeuille(d) {
     const blok = inzetTeller();
-    const lijst = m.portefeuilleLijst(d.posities);
-    const onder = d.posities ? `${lijst.length} ${lijst.length === 1 ? 'positie' : 'posities'}` : '';
-    let html = `<div class="vast">${blok(titelRij('Portefeuille', onder))}` +
-      blok(`<div class="legende-rij">
-        <span class="label goud"><span class="blokje goud"></span>Boven 8%</span>
-        <span class="label"><span class="blokje grafiet"></span>Gewicht</span>
-        <span class="label">% sinds instap</span>
-      </div>`) + '</div>';
-    const rijen = lijst.map(p => {
-      const tag = m.gewichtTag(p.gewicht);
-      return `<button type="button" class="rij positie" data-ticker="${h(p.ticker)}" aria-label="${h(m.positieLabel(p))}">
+    const posities = d.posities || [];
+    const sortering = m.actieveSortering(Instellingen.lees().sortering, posities);
+    const rang = sortering === 'rang';
+    let onder = d.posities ? `${posities.length} ${posities.length === 1 ? 'positie' : 'posities'}` : '';
+    // rang komt uit de maandrangorde: dan de peildatum in plaats van het aantal
+    if (rang && d.rangorde_datum) onder = `rangorde ${m.datum(d.rangorde_datum, 'dagmaand')}`;
+    const labels = m.sorteringen(posities).map(k =>
+      `<button type="button" class="keuze" data-sortering="${k}" aria-pressed="${k === sortering}">
+        <span class="label">${h(m.sorteerLabel(k))}</span><span class="tabnoot"></span></button>`).join('');
+    // de sorteerregel vervangt de legende en is meteen de kolomkop
+    const regel = labels ? `<div class="sorteerregel"><div class="keuzes" role="group" aria-label="Sortering">${labels}</div></div>` : '';
+    let html = `<div class="vast">${blok(titelRij('Portefeuille', onder))}${regel ? blok(regel) : ''}</div>`;
+
+    const rijen = m.portefeuilleRijen(d, sortering).map(r => {
+      if (r.soort === 'grens') return `<div class="grenslijn label">${h(m.TOP60_BUITEN)}</div>`;
+      // cash is de laatste rij ván de portefeuille, ook bij € 0: "volledig belegd" is informatie
+      if (r.soort === 'cash') return `<div class="rij cash"><span class="label">${h(r.label)}</span><span class="rij-rechts">${h(m.euro(r.bedrag))}</span></div>`;
+      const p = r.positie, tag = m.gewichtTag(p.gewicht);
+      return `<button type="button" class="rij positie" data-ticker="${h(p.ticker)}" aria-label="${h(m.positieLabel(p, { rang }))}">
         <div class="positie-lijn">
+          ${rang ? `<span class="rangnummer">${isGetal(p.rang) ? h(m.getal(p.rang)) : ''}</span>` : ''}
           <span class="ticker">${h(p.ticker)}</span>
           <span class="naam">${h(p.naam)}</span>
           ${tag ? tagHtml(tag === 'AFROOMBAAR' ? 'afroombaar' : 'restje', tag) : ''}
           ${isGetal(p.rendement) ? `<span class="rendement">${rendementHtml(p.rendement)}</span>` : ''}
           ${isGetal(p.gewicht) ? `<span class="gewicht">${h(m.pct(p.gewicht, 1))}</span>` : ''}
         </div>
-        ${isGetal(p.gewicht) ? `<div class="gewichtspoor"><span class="${m.bovenAfroomgrens(p.gewicht) ? 'boven' : ''}" style="width:${(m.gewichtBalk(p.gewicht) * 100).toFixed(2)}%"></span></div>` : ''}
       </button>`;
     }).join('');
-    // cash is de laatste rij ván de portefeuille, ook bij € 0: "volledig belegd" is informatie
-    const cash = d.vandaag && isGetal(d.vandaag.cash)
-      ? `<div class="rij cash"><span class="label">Cash</span><span class="rij-rechts">${h(m.euro(d.vandaag.cash))}</span></div>` : '';
-    html += blok(`<div class="rijen">${rijen}${cash}</div>`);
+    html += blok(`<div class="rijen portefeuille">${rijen}</div>`);
     return html;
   }
 
@@ -1186,7 +1366,8 @@ const Schermen = (() => {
       }).join('') : `<p class="leeg">${h(m.legeZin(sleutel, { rust: rust === true, open_plaatsen: vd.open_plaatsen, cash: vd.cash }))}</p>`;
       return `<section class="sectie"><div class="sectie-kop"><span class="label">${titel}</span><span class="label">${rijen.length}</span></div>${inhoud}</section>`;
     }).join('');
-    if (sectieHtml) html += blok(sectieHtml);
+    // de rustige dag: de cursieve zin zegt het al, de drie secties vervallen
+    if (sectieHtml && !m.rustigeDag(d)) html += blok(sectieHtml);
 
     const onder = [];
     if (rust !== null) {
@@ -1225,15 +1406,12 @@ const Schermen = (() => {
       ${g.datum ? `<div class="label">${h(m.datum(g.datum, 'lang'))}</div>` : ''}
       ${g.rijen.map(r => {
         const [soort, tekst] = KANT_TAG[r.kant] || [];
-        const som = [isGetal(r.aantal) ? m.getal(r.aantal) : null, isGetal(r.koers) ? m.getal(r.koers, 2) : null];
-        let bedrag = som[0] && som[1] ? `${som[0]} × ${som[1]}` : '';
-        if (isGetal(r.bedrag)) bedrag += `${bedrag ? ' = ' : ''}${m.euro(r.bedrag)}`;
-        const kosten = m.rijKosten(r);
+        const regels = m.grootboekRegels(r);
         const klikbaar = tickers.has(r.ticker);
         const tag = klikbaar ? 'button' : 'div';
         return `<${tag} class="rij"${klikbaar ? ` type="button" data-ticker="${h(r.ticker)}" data-herkomst="grootboek"` : ''}>
           <div class="rij-hoofd"><div class="positie-lijn">${soort ? tagHtml(soort, tekst) : ''}<span class="ticker">${h(r.ticker)}</span></div></div>
-          <div class="rij-rechts">${h(bedrag)}${kosten != null ? `<span class="klein">kosten ${h(m.euro(kosten))}</span>` : ''}</div>
+          <div class="rij-rechts">${h(regels.boven)}${regels.onder ? `<span class="klein">${h(regels.onder)}</span>` : ''}</div>
         </${tag}>`;
       }).join('')}
     </section>`).join('');
@@ -1249,65 +1427,73 @@ const Schermen = (() => {
     if (!p) return '';
     const meta = [p.ticker, p.sector, isGetal(p.sector_n) && isGetal(p.sector_max) ? `${p.sector_n} van ${p.sector_max}` : ''].filter(Boolean).join(' · ');
     const tag = m.bovenAfroomgrens(p.gewicht) ? tagHtml('afroombaar', 'AFROOMBAAR') : '';
+    // de beschrijving is niet cursief: cursief blijft voor de zin die de toestand vertelt
     let html = blok(`<div class="detail-kop"><div class="detail-meta">${h(meta)}</div>
-      <div class="detail-naam"><h1 class="titel">${h(p.naam || p.ticker)}</h1>${tag}</div></div>`);
+      <div class="detail-naam"><h1 class="titel">${h(p.naam || p.ticker)}</h1>${tag}</div>
+      ${p.beschrijving ? `<p class="beschrijving">${h(p.beschrijving)}</p>` : ''}</div>`);
 
     const koers = isGetal(p.koers) ? `<div><div class="label">Koers</div><div class="kolom-waarde">${h(m.euro(p.koers, 2))}</div>
       ${isGetal(p.dagkoers_verandering) ? `<div class="kolom-sub">vandaag ${h(m.pct(p.dagkoers_verandering, 1, true))}</div>` : ''}</div>` : '<div></div>';
-    let winst = '';
-    if (isGetal(p.winst_eur)) winst = p.winst_eur < 0 ? `${m.euro(-p.winst_eur)} verlies` : `${m.euro(p.winst_eur)} winst`;
+    const winst = m.winstTekst(p.winst_eur);
     const r = m.rendementWeergave(p.rendement, { detail: true });
     const instap = r ? `<div><div class="label">Sinds instap</div>
       <div class="kolom-waarde${r.positief ? ' goud' : ''}">${h(r.tekst)}</div>
       ${winst ? `<div class="kolom-sub">${h(winst)}</div>` : ''}</div>` : '';
     html += blok(`<div class="kolommen">${koers}${instap}</div>`);
 
-    if (isGetal(p.gewicht) || isGetal(p.gewicht_bij_aankoop)) {
-      const balk = (klasse, g, tekst, later) => (isGetal(g) ? `<div class="spoor"><span class="balk ${klasse} s-balk${later ? ' s-later' : ''}${klasse === 'tenor' ? ' gloeit' : ''}" style="width:${(m.gewichtBalk(g) * 100).toFixed(2)}%"></span></div>
-        <span class="balkwaarde${klasse === 'baseline' ? ' gedimd' : ''}">${h(m.pct(g, 1))} ${tekst}</span>` : '');
-      html += blok(`<div class="balkgrid">${balk('tenor', p.gewicht, 'gewicht')}${balk('baseline', p.gewicht_bij_aankoop, 'bij aankoop', true)}</div>`);
-    }
-
     const reeks = p.reeks || [], sma = p.sma_reeks || [];
     if (reeks.some(isGetal)) {
       const n = reeks.length;
+      const woorden = m.smaLabel(p.koers_vs_sma200);          // afstand_sma200 wordt nooit gelezen
       const smaLabel = sch => {
         let i = sma.length - 1;
         while (i >= 0 && !isGetal(sma[i])) i--;
-        if (i < 0 || !isGetal(p.afstand_sma200)) return '';
+        if (i < 0 || !woorden) return '';
         // onder de SMA-lijn als de koers erboven staat, erboven als de koers eronder staat; nooit door de lijn
         const kLaatste = [...reeks].reverse().find(isGetal);
         const erOnder = isGetal(kLaatste) && kLaatste >= sma[i];
-        const rechts = sch.x(i) - 10, breedte = 15 * 7.9;
+        const rechts = sch.x(i) - 10, breedte = woorden.length * 7.9;
         const ys = sma.map((v, j) => (isGetal(v) && sch.x(j) >= rechts - breedte && sch.x(j) <= rechts ? sch.y(v) : null)).filter(v => v !== null);
         let y = erOnder ? Math.max(...ys) + 15 : Math.min(...ys) - 7;
         if (y > 150 - 2) y = Math.min(...ys) - 7;
         if (y < 10) y = Math.max(...ys) + 15;
-        return `<text class="sma-label" x="${rechts.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="end">SMA200 · ${h(m.pct(p.afstand_sma200, 0, true))}</text>`;
+        return `<text class="sma-label" x="${rechts.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="end">${h(woorden)}</text>`;
+      };
+      // de instapstreep: een hairline op de instapdag, achter de lijnen
+      const ii = m.instapIndex(d.handelsdagen, p.instap, n);
+      const streep = sch => (ii == null ? '' : `<line class="instapstreep" x1="${sch.x(ii).toFixed(2)}" x2="${sch.x(ii).toFixed(2)}" y1="0" y2="150"/>`);
+      const instapLabel = (sch, maat) => {
+        if (ii == null || !m.instapLabelPast(sch.x(ii), maat.breedte)) return '';
+        return `<span class="instap-label" style="left:${(sch.x(ii) / maat.breedte * 100).toFixed(2)}%">instap</span>`;
       };
       const grafiek = grafiekHtml({
         reeksen: [{ waarden: reeks, klasse: 'tenor' }, { waarden: sma, klasse: 'sma', later: true }],
         noot: 0,
         maat: { breedte: 350, hoogte: 150, links: 0, rechts: 6, boven: 16, onder: 6, asLabel: rondeKoers },
-        label: `Koers en SMA200 over 200 dagen: koers ${m.euro(p.koers, 2)}${isGetal(p.sma200) ? `, SMA200 ${m.euro(p.sma200, 2)}` : ''}`,
+        label: `Koers en SMA200 over 200 dagen: koers ${m.euro(p.koers, 2)}${isGetal(p.sma200) ? `, SMA200 ${m.euro(p.sma200, 2)}` : ''}${woorden ? `, ${woorden.toLowerCase().replace('sma200', 'SMA200')}` : ''}`,
         onder: ['200 dagen geleden', 'nu'],
         aflezing: i => `${[m.datum(m.dagVanPunt(d.handelsdagen, i, n), 'wdm')].filter(Boolean).map(t => `${h(t)} · `).join('')}<span class="goud-tekst">koers ${h(m.euro(reeks[i], 2))}</span>${isGetal(sma[i]) ? ` · <span style="color:var(--mute)">SMA ${h(m.euro(sma[i], 2))}</span>` : ''}`,
-        extraSvg: smaLabel
+        extraSvg: sch => streep(sch) + smaLabel(sch),
+        onderExtra: instapLabel
       });
       html += blok(`<div class="grafiek-blok">${grafiek}
         <div class="legende"><span class="label goud">Koers</span><span class="label">SMA200 · verkoopdrempel</span></div></div>`);
     }
 
     const rijen = [];
+    if (isGetal(p.gewicht)) {
+      rijen.push(rij({ titel: 'Gewicht', sub: isGetal(p.gewicht_bij_aankoop) ? `${m.pct(p.gewicht_bij_aankoop, 1)} bij aankoop` : '', rechts: h(m.pct(p.gewicht, 1)) }));
+    }
     if (p.instap) {
       rijen.push(rij({ titel: 'Instap', sub: isGetal(p.dagen) ? `${m.dagenTekst(p.dagen)} in bezit` : '',
         rechts: h([m.datum(p.instap, 'cijfers'), isGetal(p.koers_in) ? m.euro(p.koers_in, 2) : ''].filter(Boolean).join(' · ')) }));
     }
     if (isGetal(p.rang) || isGetal(p.score)) {
-      const peil = d.rangorde_datum;
-      const top = typeof p.in_top60 === 'boolean' ? (p.in_top60 ? 'blijft in de top-60' : 'uit de top-60: verkoopregel geldt') : '';
-      rijen.push(rij({ titel: 'Rangorde', sub: [peil ? `van ${m.datum(peil, 'dagmaand')}` : '', top].filter(Boolean).join(' · '),
-        rechts: h([isGetal(p.rang) ? `rang ${p.rang}` : '', isGetal(p.score) ? `score ${p.score}` : ''].filter(Boolean).join(' · ')) }));
+      rijen.push(rij({ titel: 'Rangorde', sub: m.rangordeSub(p, d.rangorde_datum), rechts: h(m.rangordeRechts(p)) }));
+    }
+    // het dividend zit niet in het rendement sinds instap: dat is koersrendement, en het dividend staat in de cash
+    if (m.toonDividend(p)) {
+      rijen.push(rij({ titel: 'Dividend', sub: m.dividendRegel(d.grootboek, p.ticker, p.instap), rechts: h(m.euro(p.dividend_eur, 2)) }));
     }
     const t = m.transactiesVoorNaam(d.grootboek, p.ticker);
     if (t.aantal) {
@@ -1344,7 +1530,7 @@ const Schermen = (() => {
 
   /* ---- 5.7 Instellingen ---- */
 
-  const VERSIE = '0.4.0';  // gelijk houden met VERSIE in sw.js
+  const VERSIE = '0.5.0';  // gelijk houden met VERSIE in sw.js
   const TEST_ZIN = {
     ok: 'Het token werkt.',
     token: 'GitHub weigert dit token. Maak een nieuw aan met alleen contents: read.',
@@ -1452,7 +1638,7 @@ const Schermen = (() => {
     el.innerHTML = html;
   }
 
-  function teken({ beweging = null, stil = false } = {}) {
+  function teken({ beweging = null, stil = false, bovenaan = false } = {}) {
     const d = staat.monitor || {};
     const app = document.getElementById('app'), kop = document.getElementById('kop');
     const scherm = document.getElementById('scherm'), tabbalk = document.getElementById('tabbalk');
@@ -1478,7 +1664,7 @@ const Schermen = (() => {
 
     const scroll = scherm.scrollTop;
     scherm.innerHTML = `<div class="schermvlak${stil ? ' stil' : ''}${beweging ? ' ' + beweging : ''}">${inhoud}</div>`;
-    scherm.scrollTop = stil ? scroll : 0;
+    scherm.scrollTop = stil && !bovenaan ? scroll : 0;
 
     // 1. Strijk: alleen bij openen
     if (staat.eersteKeer && !stil) {
@@ -1587,7 +1773,7 @@ const Schermen = (() => {
   /* ---- gebaren van de gebruiker ---- */
 
   function klik(e) {
-    const el = e.target.closest('[data-tab],[data-ticker],[data-terug],[data-filter],[data-filter-weg],[data-open-instellingen],[data-sluit-instellingen],[data-actie],[data-thema-keuze]');
+    const el = e.target.closest('[data-tab],[data-ticker],[data-terug],[data-filter],[data-filter-weg],[data-open-instellingen],[data-sluit-instellingen],[data-actie],[data-thema-keuze],[data-sortering]');
     if (!el) return;
     const ds = el.dataset;
     if (ds.tab) {
@@ -1612,6 +1798,11 @@ const Schermen = (() => {
       Instellingen.bewaar({ thema: ds.themaKeuze });
       Thema.zet(ds.themaKeuze);
       document.querySelectorAll('[data-thema-keuze]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themaKeuze === ds.themaKeuze)));
+    } else if (ds.sortering) {
+      // 5.2: een tik op het actieve label doet niets; een ander label sorteert meteen, zonder animatie, en zet de lijst bovenaan
+      if (ds.sortering === m.actieveSortering(Instellingen.lees().sortering, (staat.monitor || {}).posities)) return;
+      Instellingen.bewaar({ sortering: ds.sortering });
+      teken({ stil: true, bovenaan: true });
     } else if (ds.ticker) {
       staat.detail = { ticker: ds.ticker, herkomst: ds.herkomst || staat.tab };
       teken({ beweging: 'naar-detail' });

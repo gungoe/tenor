@@ -23,5 +23,5 @@ with sync_playwright() as p:
     # grafiek aflezen op Stand
     pg.click('[data-tab="stand"]'); g = pg.locator('[data-grafiek]').bounding_box()
     pg.mouse.move(g['x'] + 80, g['y'] + 40); pg.mouse.down(); print('aflezing:', pg.inner_text('.aflezing')); pg.mouse.up()
-    print('fouten:', fouten)
+    print('\nfouten:', fouten or 'geen')
     b.close()
