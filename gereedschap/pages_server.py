@@ -14,4 +14,6 @@ class Pages(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     poort, map_ = int(sys.argv[1]), sys.argv[2]
-    http.server.ThreadingHTTPServer(('localhost', poort), functools.partial(Pages, directory=map_)).serve_forever()
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', poort), functools.partial(Pages, directory=map_))
+    print(f'luistert op {poort}', flush=True)   # het teken voor omgeving.start_server: deze server, niet een andere
+    server.serve_forever()

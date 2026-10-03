@@ -1,6 +1,6 @@
 """Service worker: wat er wel en niet in de cache komt, dat GitHub ongemoeid blijft,
    openen in vliegtuigstand, en het opruimen van een oude cache bij een nieuwe versie.
-   Start zelf een servertje op localhost. Gebruik: python3 gereedschap/swtest.py"""
+   Start zelf een servertje op 127.0.0.1 (op 8765, of op een vrije poort als die bezet is). Gebruik: python3 gereedschap/swtest.py"""
 import json, re
 from playwright.sync_api import sync_playwright
 from omgeving import FIXTURES, kopie_van_de_app, start_server
@@ -19,6 +19,7 @@ def ok(v, wat):
 
 
 server = start_server(MAP, POORT)
+POORT = server.poort                    # een andere als 8765 bezet was
 try:
     with sync_playwright() as p:
         b = p.chromium.launch()
@@ -30,7 +31,7 @@ try:
         pg.on('pageerror', lambda e: fouten.append(str(e)))
         api = []
         pg.on('request', lambda r: 'api.github.com' in r.url and api.append(r.url))
-        pg.goto(f'http://localhost:{POORT}/')
+        pg.goto(f'http://127.0.0.1:{POORT}/')
         pg.wait_for_timeout(1500)
         actief = pg.evaluate("navigator.serviceWorker.controller !== null")
         if not actief:

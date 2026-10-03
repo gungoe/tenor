@@ -31,6 +31,11 @@
   --mono: 'IBM Plex Mono', Menlo, 'SF Mono', monospace;
   --marge: 22px;
   --curve: cubic-bezier(.4, 0, .2, 1);
+  /* de veilige zones: alleen hier env(); een test bootst de uitsparing na door een variabele te zetten */
+  --veilig-boven: env(safe-area-inset-top);
+  --veilig-rechts: env(safe-area-inset-right);
+  --veilig-onder: env(safe-area-inset-bottom);
+  --veilig-links: env(safe-area-inset-left);
   color-scheme: light;
 }
 html[data-rust] { --grond: #EFE9DA; }
@@ -42,19 +47,24 @@ html[data-thema="avond"] {
 html[data-thema="avond"][data-rust] { --grond: #0F0E11; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: var(--grond); }
+html, body { height: 100%; background: var(--grond); transition: background-color 2.4s var(--curve); }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* de buitenste laag: de veilige zones links en rechts, met de kolom (.app) daarbinnen */
 body {
+  padding-left: var(--veilig-links); padding-right: var(--veilig-rechts);
   color: var(--inkt); font: 400 15px/1.4 var(--sans);
-  font-variant-numeric: tabular-nums; -webkit-text-size-adjust: 100%;
+  font-variant-numeric: tabular-nums;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
 }
 button { font: inherit; color: inherit; background: none; border: 0; text-align: inherit; cursor: pointer; }
 button:focus-visible { outline: 2px solid var(--goud); outline-offset: 2px; }
 svg { display: block; }
 
+/* de kolom: in elke stand hoogstens 440 px, gecentreerd binnen de veilige zone, de tabbalk inbegrepen.
+   Geen eigen achtergrond: links en rechts ervan ligt dezelfde grond, en de spot mag over de rand vallen. */
 .app {
-  position: relative; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--grond); transition: background-color 2.4s var(--curve);
+  position: relative; height: 100dvh; display: flex; flex-direction: column;
+  max-width: 440px; margin-inline: auto;
 }
 .app > * { position: relative; z-index: 1; }
 .app > .spot { position: absolute; z-index: 0; }
@@ -62,7 +72,7 @@ svg { display: block; }
 /* ---- kop ---- */
 .kop {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  min-height: 44px; padding: calc(8px + env(safe-area-inset-top)) var(--marge) 0;
+  min-height: 44px; padding: calc(8px + var(--veilig-boven)) var(--marge) 0;
 }
 .merk { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .merk svg { width: 46px; height: 28px; overflow: visible; }
@@ -88,11 +98,16 @@ svg { display: block; }
 }
 .titel { font: 500 34px/1.15 var(--serif); letter-spacing: -.01em; }
 .onderregel { margin-left: auto; font: 400 12px/1.4 var(--mono); color: var(--mute); white-space: nowrap; }
-.vast { position: sticky; top: 0; z-index: 2; background: var(--grond); transition: background-color 2.4s var(--curve); }
+.vast { position: sticky; top: 0; z-index: 2; }
+/* de grond van de vaste kop ligt in ::before, zodat hij weg kan zonder dat er bij draaien een overgang start */
+.vast::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grond); transition: background-color 2.4s var(--curve); }
 /* de spot ligt onder de inhoud; de vaste kop draagt dezelfde lichtvlek, zodat er geen rand ontstaat */
-html[data-thema="avond"] .vast {
+html[data-thema="avond"] .vast::before {
   background-image: radial-gradient(300px circle at -60px calc(-60px - var(--kophoogte, 52px)), rgba(214, 178, 94, .16), rgba(214, 178, 94, 0));
 }
+/* een vaste kop blijft alleen staan bij een venster van minstens 600 px hoog; lager scrolt hij mee,
+   en dan zonder eigen grond, zodat de spot erdoor valt zoals op de rest van de inhoud */
+@media (max-height: 599px) { .vast { position: static; } .vast::before { display: none; } }
 
 .zin-blok { display: flex; gap: 12px; align-items: flex-start; padding: 10px var(--marge) 0; }
 .zin { font: italic 400 18px/1.35 var(--serif); color: var(--sub); max-width: 34ch; }
@@ -241,7 +256,7 @@ html[data-thema="avond"] .vast {
 .sma-label { font: 400 10.5px var(--mono); letter-spacing: .14em; fill: var(--mute); }
 
 /* ---- tabbalk ---- */
-.tabbalk { display: flex; border-top: 1px solid var(--lijn); padding-bottom: env(safe-area-inset-bottom); background: var(--grond); transition: background-color 2.4s var(--curve); }
+.tabbalk { display: flex; border-top: 1px solid var(--lijn); padding-bottom: var(--veilig-onder); background: var(--grond); transition: background-color 2.4s var(--curve); }
 .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 58px; padding: 8px 0 6px; color: var(--mute); }
 .tab svg { width: 22px; height: 22px; }
 .tab .label { color: inherit; }
@@ -251,7 +266,7 @@ html[data-thema="avond"] .vast {
 .icoon { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .rustteken path { fill: none; stroke: var(--goud); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 
-.voorbeeld-label { text-align: center; padding: calc(4px + env(safe-area-inset-top)) 0 0; }
+.voorbeeld-label { text-align: center; padding: calc(4px + var(--veilig-boven)) 0 0; }
 .voorbeeld-label + .kop { padding-top: 2px; }
 
 /* ==== beweging: vier gebaren ==== */
@@ -1530,7 +1545,7 @@ const Schermen = (() => {
 
   /* ---- 5.7 Instellingen ---- */
 
-  const VERSIE = '0.5.0';  // gelijk houden met VERSIE in sw.js
+  const VERSIE = '0.5.1';  // gelijk houden met VERSIE in sw.js
   const TEST_ZIN = {
     ok: 'Het token werkt.',
     token: 'GitHub weigert dit token. Maak een nieuw aan met alleen contents: read.',

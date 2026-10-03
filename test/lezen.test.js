@@ -68,11 +68,23 @@ test('fixtures dragen elke nieuwe toestand', () => {
   gelijk(vb.posities.find(p => p.ticker === div.ticker).dividend_eur, div.bedrag, 'dividend_eur is de som van het netto');
   gelijk(vb.posities.every(p => typeof p.dividend_eur === 'number'), true, 'dividend_eur 0 is informatie, niet afwezig');
   gelijk(vb.posities.every(p => p.beschrijving && p.beschrijving.length <= 90 && !/\d/.test(p.beschrijving)), true, 'beschrijving');
-  gelijk(vb.posities.some(p => /^(Industrials|Financials|Energy|Utilities|Health Care)$/.test(p.sector)), false, 'sectoren in het Nederlands');
   gelijk(vb.posities.some(p => String(p.koers_vs_sma200).split('.')[1].length === 5), true, 'koers_vs_sma200 met vijf decimalen');
   gelijk(vb.posities.every(p => typeof p.afstand_sma200 === 'number'), true, 'afstand_sma200 staat er nog');
   gelijk(rest.posities.some(p => p.in_top60 === false), true, 'positie buiten de top-60');
   gelijk(rest.vandaag.open_plaatsen > 0, true, 'open plaatsen');
   gelijk(rest.grootboek.some(r => r.kant === 'DIVIDEND' && r.bruto === undefined), true, 'dividend zonder bruto');
   gelijk(rest.posities.some(p => p.beschrijving === undefined), true, 'positie zonder beschrijving');
+});
+test('sectornamen: elke sector in de fixtures staat in de lijst van hoofdstuk 3', () => {
+  const LIJST = ['Energie', 'Grondstoffen', 'Industrie', 'Cyclische consumptie', 'Basisconsumptie', 'Gezondheidszorg',
+    'Financiële diensten', 'Technologie', 'Communicatie', 'Nutsbedrijven', 'Vastgoed'];
+  for (const naam of ['voorbeeld', 'rest', 'oud']) {
+    const buiten = fixture(naam).posities.map(p => p.sector).filter(s => !LIJST.includes(s));
+    gelijk(buiten, [], `${naam}.json: sector buiten de lijst`);
+  }
+  const vb = voorbeeld();
+  gelijk(vb.posities.some(p => p.sector === 'Cyclische consumptie'), true, 'minstens één Cyclische consumptie');
+  gelijk(vb.posities.some(p => p.sector === 'Basisconsumptie'), true, 'minstens één Basisconsumptie');
+  const breed = fixture('rest').posities.find(p => p.ticker.length >= 'ESSITY-B.ST'.length && p.sector === 'Cyclische consumptie');
+  gelijk(breed && `${breed.sector_n} van ${breed.sector_max}`, '8 van 8', 'het breedtegeval staat in rest.json');
 });

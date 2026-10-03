@@ -1,6 +1,6 @@
 """Uitrol achter de HTTP-cache van GitHub Pages (max-age=600): installeert de huidige versie,
    verhoogt daarna VERSIE in index.html en sw.js naar 9.9.9, en opent drie keer.
-   'nieuw' hoort 0.5.0 -> 9.9.9 -> 9.9.9 te geven, 'oud' (zonder de twee cacheregels) blijft hangen.
+   'nieuw' hoort 0.5.1 -> 9.9.9 -> 9.9.9 te geven, 'oud' (zonder de twee cacheregels) blijft hangen.
    Gebruik: python3 gereedschap/uitrol.py nieuw 8802"""
 import sys, time, pathlib, shutil, subprocess
 from playwright.sync_api import sync_playwright
@@ -15,12 +15,13 @@ if variant == 'oud':   # de regels van vóór de review
     s = s.replace("fetch(verzoek.mode === 'navigate' ? './index.html' : verzoek, { cache: 'no-cache' })", "fetch(verzoek)")
     sw.write_text(s)
 server = start_server(map_, poort)
+poort = server.poort                    # een andere als de gevraagde bezet was
 def versie(pg): return pg.evaluate("document.documentElement.innerHTML.match(/const VERSIE = '([\\d.]+)'/)[1]")
 try:
     with sync_playwright() as p:
         b = p.chromium.launch(); ctx = b.new_context()
-        pg = ctx.new_page(); pg.goto(f'http://localhost:{poort}/'); pg.wait_for_timeout(1500)
-        pg.goto(f'http://localhost:{poort}/'); pg.wait_for_timeout(800)            # nu door de service worker
+        pg = ctx.new_page(); pg.goto(f'http://127.0.0.1:{poort}/'); pg.wait_for_timeout(1500)
+        pg.goto(f'http://127.0.0.1:{poort}/'); pg.wait_for_timeout(800)            # nu door de service worker
         gezien = [versie(pg)]
         time.sleep(1.2)
         for f in ('index.html', 'sw.js'):
@@ -29,7 +30,7 @@ try:
             oud_nr = tekst.split("VERSIE = '")[1].split("'")[0]
             pad.write_text(tekst.replace(f"VERSIE = '{oud_nr}'", "VERSIE = '9.9.9'"))
         for opening in range(3):                                                  # openen na de push
-            pg.close(); pg = ctx.new_page(); pg.goto(f'http://localhost:{poort}/'); pg.wait_for_timeout(1500)
+            pg.close(); pg = ctx.new_page(); pg.goto(f'http://127.0.0.1:{poort}/'); pg.wait_for_timeout(1500)
             gezien.append(versie(pg))
         print(variant, '· vóór de push:', gezien[0], '· openingen na de push:', ' → '.join(gezien[1:]),
               '· caches:', pg.evaluate('caches.keys()'))

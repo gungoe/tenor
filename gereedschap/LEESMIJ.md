@@ -28,14 +28,14 @@ Meer is er niet nodig: geen npm-pakketten, geen Pillow, geen Safari. Klaagt `pip
 
 | script | duurt | wat het doet |
 |---|---|---|
-| `controle.py` | ~2 min | Elk scherm op 390 × 844, in dag en avond, met elke fixture, Portefeuille in elk van de drie sorteringen en Detail met een zichtbaar instaplabel. Meldt alles wat buiten de marge valt, afbreekt of een tikdoel onder 44 px heeft, controleert de rij CASH als laatste, de grenslijn bij RANG en de grootboekrij met breukdeel, en legt van elk scherm twee afdrukken in `werkmap/`. Met argumenten te beperken: `python3 gereedschap/controle.py voorbeeld dag`. |
+| `controle.py` | ~6 min | Elk scherm in dag en avond, met elke fixture, Portefeuille in elk van de drie sorteringen, Detail met een zichtbaar instaplabel en met de langste metaregel (`ESSITY-B.ST · Cyclische consumptie · 8 van 8`, uit `rest.json`), in vier maten: 390 × 844 en 440 × 956 staand, en 844 × 390 liggend met de uitsparing links en rechts (zie onder). Meldt alles wat buiten de marge of de kolom valt, tekst in de uitsparing, een tabbalk die niet onderaan in de kolom staat, koppen die niet meescrollen, wat afbreekt en tikdoelen onder 44 px; controleert de rij CASH als laatste, de grenslijn bij RANG en de grootboekrij met breukdeel. Daarna de draaiproef: wisselen tussen 390 × 844 en 844 × 390 bewaart scherm en scrollpositie, tekent niet opnieuw en start geen animatie. Legt van elk scherm twee afdrukken in `werkmap/`. Met argumenten te beperken: `python3 gereedschap/controle.py voorbeeld dag liggend-links`. |
 | `stap3.py` | ~20 s | De app met nagebootste GitHub-antwoorden: eerste installatie, kopie en vernieuwen, geweigerd token, offline, laadscherm, lange druk op het merk, trek om te vernieuwen, gefilterd grootboek, oude en mislukte run. |
 | `stap3b.py` | ~1 min | Per reviewpunt: rendement onder 10%, een naam die verdwijnt, dividend, balklengtes, "pt" in Gold ink, 5xx, 404 met en zonder kopie, de wachtregel na 8 s en de time-out van 15 s. Daarom de wachttijden. |
 | `beweging.py` | ~10 s | De vier gebaren en de navigatie: strijk bij openen, detail heen en terug, gefilterd grootboek, aflezen van de grafiek. Meldt fouten uit de console. |
-| `swtest.py` | ~15 s | De service worker, op een eigen servertje (poort 8765): wat er in de cache komt, dat GitHub ongemoeid blijft, openen in vliegtuigstand, en het opruimen van een oude cache. |
-| `uitrol.py` | ~20 s | Een uitrol achter `max-age=600`, zoals GitHub Pages. `python3 gereedschap/uitrol.py nieuw 8802` hoort `0.5.0 → 9.9.9 → 9.9.9` te geven: de nieuwe versie bij de tweede opening. Met `oud` draait hij dezelfde proef zonder de twee cacheregels in `sw.js`; dan blijft hij hangen op de oude versie. |
+| `swtest.py` | ~15 s | De service worker, op een eigen servertje (poort 8765, of een vrije als die bezet is): wat er in de cache komt, dat GitHub ongemoeid blijft, openen in vliegtuigstand, en het opruimen van een oude cache. |
+| `uitrol.py` | ~20 s | Een uitrol achter `max-age=600`, zoals GitHub Pages. `python3 gereedschap/uitrol.py nieuw 8802` hoort `0.5.1 → 9.9.9 → 9.9.9` te geven: de nieuwe versie bij de tweede opening. Met `oud` draait hij dezelfde proef zonder de twee cacheregels in `sw.js`; dan blijft hij hangen op de oude versie. |
 | `pages_server.py` | — | Het servertje dat `Cache-Control: max-age=600` meestuurt. De andere scripts starten het zelf. |
-| `omgeving.py` | — | Paden, de kijkbestanden en het starten van de server. Geen script om te draaien. |
+| `omgeving.py` | — | Paden, de kijkbestanden en het starten van de server. Geen script om te draaien. `start_server` praat nooit met een server die hij niet zelf startte: is de poort bezet (op IPv4 of IPv6), dan kiest hij een vrije en meldt welke, en hij wacht op het teken van zijn eigen proces. |
 
 Na een wijziging in `index.html` is dit de ronde: `node test/draai.js`, dan `stap3.py`, `stap3b.py`, `controle.py`, `beweging.py`, en `swtest.py` als je aan `sw.js` of het manifest kwam.
 
@@ -49,6 +49,10 @@ Alle scripts eindigen met `fouten: geen` of met een lijst. Draai je zonder inter
 | `../test/fixtures/maak_fixtures.js` | `rest.json` en `oud.json`, afgeleid uit `voorbeeld.json`. Draai dit dus ná de vorige. |
 | `maak_iconen.py` | `iconen/` — één vorm, vier materialen, als SVG en als PNG van 180, 192 en 512. |
 | `maak_voorbeeld_html.py` | Een los html-bestand met een fixture erin. De controlescripts roepen het zelf aan; het resultaat staat in `werkmap/`. |
+
+## De uitsparing nabootsen
+
+Chromium kent geen camera-uitsparing: `env(safe-area-inset-*)` is er altijd 0. De app leest de veilige zones daarom via vier variabelen op `:root` (`--veilig-boven`, `-rechts`, `-onder`, `-links`), en `controle.py` zet die liggend zelf: één keer `--veilig-links: 59px` en één keer `--veilig-rechts: 59px`, telkens met `--veilig-onder: 21px`. Het laatste woord heeft de iPhone, liggend naar beide kanten, in standalone.
 
 ## werkmap/
 

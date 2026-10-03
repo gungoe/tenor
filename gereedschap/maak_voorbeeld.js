@@ -5,7 +5,7 @@ const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-12)) * Math.cos(2 * Math.
 const r2 = n => Math.round(n * 100) / 100, r4 = n => Math.round(n * 1e4) / 1e4, r5 = n => Math.round(n * 1e5) / 1e5;
 const START = '2026-09-22', MIDDEN = '2026-09-23', STAND = '2026-09-24';
 const TAKS = 0.0035, SPREAD = 0.001, K = 100000;
-// ticker, naam, sector (in het Nederlands, zoals de Mac ze wegschrijft), koers bij instap, beschrijving (hoogstens 90 tekens, geen cijfer)
+// ticker, naam, sector (uit de vaste lijst van hoofdstuk 3, zoals de Mac ze wegschrijft), koers bij instap, beschrijving (hoogstens 90 tekens, geen cijfer)
 const namen = [
  ['RHM.DE','Rheinmetall','Industrie',1712.5,'Voertuigen, munitie en luchtverdediging voor krijgsmachten, en onderdelen voor auto\'s.'],
  ['ENR.DE','Siemens Energy','Industrie',104.6,'Gasturbines, windturbines en netapparatuur voor het opwekken en vervoeren van stroom.'],
@@ -23,9 +23,9 @@ const namen = [
  ['ALV.DE','Allianz','Financiële diensten',361.8,'Schade-, levens- en zorgverzekeringen en vermogensbeheer voor klanten wereldwijd.'],
  ['ZURN.SW','Zurich Insurance','Financiële diensten',612.4,'Schade- en levensverzekeringen voor particulieren en bedrijven wereldwijd.'],
  ['CBK.DE','Commerzbank','Financiële diensten',34.1,'Duitse bank voor middelgrote bedrijven en particulieren, ook actief in Polen.'],
- ['ASML.AS','ASML','Informatietechnologie',742.3,'Lithografiemachines waarmee chipmakers patronen op siliciumschijven belichten.'],
- ['SAP.DE','SAP','Informatietechnologie',248.1,'Bedrijfssoftware voor boekhouding, inkoop, personeel en logistiek, ook in de cloud.'],
- ['IFX.DE','Infineon','Informatietechnologie',38.6,'Halfgeleiders voor auto\'s, stroomvoorziening en industriële toepassingen.'],
+ ['ASML.AS','ASML','Technologie',742.3,'Lithografiemachines waarmee chipmakers patronen op siliciumschijven belichten.'],
+ ['SAP.DE','SAP','Technologie',248.1,'Bedrijfssoftware voor boekhouding, inkoop, personeel en logistiek, ook in de cloud.'],
+ ['IFX.DE','Infineon','Technologie',38.6,'Halfgeleiders voor auto\'s, stroomvoorziening en industriële toepassingen.'],
  ['ROG.SW','Roche','Gezondheidszorg',289.5,'Geneesmiddelen, vooral tegen kanker, en diagnostische tests voor laboratoria.'],
  ['AZN.L','AstraZeneca','Gezondheidszorg',131.2,'Geneesmiddelen tegen kanker en voor hart, longen, nieren en zeldzame ziekten.'],
  ['NOVN.SW','Novartis','Gezondheidszorg',104.8,'Geneesmiddelen op voorschrift voor hart, kanker, immuunziekten en het zenuwstelsel.'],
@@ -33,10 +33,10 @@ const namen = [
  ['ENEL.MI','Enel','Nutsbedrijven',8.31,'Opwekking en levering van stroom en gas, en elektriciteitsnetten in Italië en Spanje.'],
  ['SHEL.L','Shell','Energie',31.9,'Olie- en gaswinning, vloeibaar aardgas, raffinage en tankstations wereldwijd.'],
  ['TTE.PA','TotalEnergies','Energie',55.2,'Winning, raffinage en levering van olie, gas en stroom, en tankstations wereldwijd.'],
- ['NESN.SW','Nestlé','Basisconsumptiegoederen',84.7,'Voeding en dranken, waaronder koffie, dierenvoeding, zuivel en babyvoeding.'],
- ['ULVR.L','Unilever','Basisconsumptiegoederen',53.6,'Verzorgingsproducten, schoonmaakmiddelen en voeding voor huishoudens wereldwijd.'],
- ['MC.PA','LVMH','Duurzame consumptiegoederen',612.0,'Mode, lederwaren, wijn en sterke drank, parfum, horloges en juwelen.'],
- ['DTE.DE','Deutsche Telekom','Communicatiediensten',31.4,'Mobiele en vaste telefonie en internet in Duitsland, Europa en de Verenigde Staten.']
+ ['NESN.SW','Nestlé','Basisconsumptie',84.7,'Voeding en dranken, waaronder koffie, dierenvoeding, zuivel en babyvoeding.'],
+ ['ULVR.L','Unilever','Basisconsumptie',53.6,'Verzorgingsproducten, schoonmaakmiddelen en voeding voor huishoudens wereldwijd.'],
+ ['MC.PA','LVMH','Cyclische consumptie',612.0,'Mode, lederwaren, wijn en sterke drank, parfum, horloges en juwelen.'],
+ ['DTE.DE','Deutsche Telekom','Communicatie',31.4,'Mobiele en vaste telefonie en internet in Duitsland, Europa en de Verenigde Staten.']
 ];
 const sectorN = {}; namen.forEach(n => sectorN[n[2]] = (sectorN[n[2]] || 0) + 1);
 const rangen = [...Array(30).keys()].map(i => i + 1 + Math.floor(rnd() * 3 * (i / 29)));

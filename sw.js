@@ -4,7 +4,7 @@
    kopie in tenor.kopie. Een tweede kopie hier zou een netwerkfout laten lijken op een geslaagde 200,
    de offline-regel verbergen en de time-out van 15 s omzeilen. */
 
-const VERSIE = '0.5.0';                 // bij elke uitrol verhogen, samen met VERSIE in index.html
+const VERSIE = '0.5.1';                 // bij elke uitrol verhogen, samen met VERSIE in index.html
 const CACHE = `tenor-app-${VERSIE}`;
 
 const APP = [

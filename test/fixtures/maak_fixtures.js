@@ -19,6 +19,12 @@ sie.rendement = -0.0063; delete sie.beschrijving;
 const rhm = d.posities.find(p => p.ticker === 'RHM.DE');
 Object.assign(rhm, { gewicht: 0.0082, rendement: -0.412, winst_eur: -1204, in_top60: false, rang: 77, score: 38 });
 d.posities.find(p => p.ticker === 'SAAB-B.ST').naam = 'Saab Aktiebolag serie B (fictief lange naam)';
+// het breedtegeval van hoofdstuk 3: de langste metaregel op Detail, `ESSITY-B.ST · Cyclische consumptie · 8 van 8`.
+// Alleen een maat voor de breedtetest, geen uitspraak over Essity; zonder beschrijving, want die is niet nagekeken.
+const breed = d.posities.find(p => p.ticker === 'MC.PA');
+Object.assign(breed, { ticker: 'ESSITY-B.ST', naam: 'Essity', sector: 'Cyclische consumptie', sector_n: 8, sector_max: 8 });
+delete breed.beschrijving;
+d.grootboek.filter(r => r.ticker === 'MC.PA').forEach(r => { r.ticker = 'ESSITY-B.ST'; });
 d.marktfilter = { aan: false, afstand: -0.021, maanden_onder: 2, bevestiging: 2, laatste_maandeinde: '2026-08-31',
   tekst: 'De markt sloot twee maanden onder haar 10-maandsgemiddelde; er wordt niet gekocht tot ze erboven sluit.' };
 d.stand.zin = 'Rest. De markt sloot twee maanden onder haar gemiddelde; er wordt niet gekocht tot ze erboven sluit.';
